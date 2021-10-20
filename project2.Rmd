@@ -1,0 +1,47 @@
+---
+title: "Project 2"
+author: "Dave Bergeron"
+date: "10/19/2021"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rmarkdown)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(knitr)
+library(readr)
+library(purrr)
+library(haven)
+library(readxl)
+library(devtools)
+library(bigrquery)
+library(DBI)
+library(RSQLite)
+library(parallel)
+library(purrr)
+library(lattice)
+library(caret)
+library(ciTools)
+library(plot3D)
+library(MuMIn)
+library(devtools)
+library(ggbiplot)
+library(pls)
+library(corrplot)
+library(ggiraphExtra)
+library(car)
+```
+
+## Test for project 2
+
+Test
+
+```{r, echo=TRUE, eval=FALSE}
+
+```
+
+
