@@ -71,6 +71,31 @@ world <- news %>% filter(data_channel_is_world == 1) %>% select(!c(data_channel_
 set.seed(55)
 trainIndex <- createDataPartition(world$shares, p = 0.7, list = FALSE)
 
+# bus
+busTrain <- bus[trainIndex, ]
+busTest <- bus[-trainIndex, ]
+
+# entertainment
+entertainTrain <- entertainment[trainIndex, ]
+entertainTest <- entertainment[-trainIndex, ]
+
+# lifestyle 
+lifestyleTrain <- lifestyle[trainIndex, ]
+lifestyleTest <- lifestyle[-trainIndex, ]
+
+# news 
+newsTrain <- news[trainIndex, ]
+newsTest <- news[-trainIndex, ]
+
+# socmed 
+socmedTrain <- socmed[trainIndex, ]
+socmedTest <- socmed[-trainIndex, ]
+
+# tech 
+techTrain <- tech[trainIndex, ]
+techTest <- tech[-trainIndex, ]
+
+# world
 worldTrain <- world[trainIndex, ]
 worldTest <- world[-trainIndex, ]
 ```
@@ -87,13 +112,15 @@ corrplot(corrs, tl.cex = 0.5)
 
 In this section we're going to compare the following models: random forest, linear regression, and two ensemble models (we can fill this in when we decide which two to do). Each of the models will be trying to predict the amount of shares for each of the data channels. 
 
-```{r}
-set.seed(55)
-```
 
 ## Random Forest
-```{r}
 
+Tried to use all the variables, took forever to run. Initially had 10 cv and 1:15 trees. Made the cv to 5 and tried smaller mtry values but it still takes a long time. 
+
+```{r}
+set.seed(55)
+# takes forever to run
+# rfFit <- train(shares ~ ., data = worldTrain, method = "rf", trControl = trainControl(method = "cv", number = 5), tuneGrid = expand.grid(mtry = 1:8))
 ```
 
 ## Linear Regression
