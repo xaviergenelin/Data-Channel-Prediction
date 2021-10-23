@@ -5,16 +5,12 @@ date: "10/19/2021"
 output: github_document
 ---
 
+I don't think we need all of these libraries. We can keep them for now but the project doesn't require anything with SQL so those can be removed later.
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(rmarkdown)
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(knitr)
-library(readr)
-library(purrr)
 library(haven)
 library(readxl)
 library(devtools)
@@ -34,7 +30,6 @@ library(pls)
 library(corrplot)
 library(ggiraphExtra)
 library(car)
-library(corrplot)
 ```
 
 # Introduction
@@ -85,7 +80,7 @@ I was hoping to see the correlation plot for the variables to see what was most 
 ```{r}
 corrs <- cor(worldTrain)
 
-corrplot(corrs, tl.cex = 0.5, method = "number")
+corrplot(corrs, tl.cex = 0.5)
 ```
 
 # Modeling
