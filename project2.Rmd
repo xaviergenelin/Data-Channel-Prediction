@@ -34,6 +34,9 @@ library(pls)
 library(corrplot)
 library(ggiraphExtra)
 library(car)
+library(class)
+library(gbm)
+library(randomForest)
 ```
 
 ## Test for project 2
