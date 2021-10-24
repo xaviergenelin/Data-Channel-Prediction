@@ -1,11 +1,13 @@
 ---
 title: "Project 2"
-author: "Dave Bergeron"
+author: "Group 6, Xavier Genelin, Dave Bergeron"
 date: "10/19/2021"
 output: github_document
 ---
 
 I don't think we need all of these libraries. We can keep them for now but the project doesn't require anything with SQL so those can be removed later.
+
+Dave:  Agree, one of my bad habits not pruning the list from one assignment to the other.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -13,10 +15,10 @@ library(tidyverse)
 library(rmarkdown)
 library(haven)
 library(readxl)
-library(devtools)
-library(bigrquery)
-library(DBI)
-library(RSQLite)
+#library(devtools)
+#library(bigrquery)
+#library(DBI)
+#library(RSQLite)
 library(parallel)
 library(purrr)
 library(lattice)
@@ -25,7 +27,7 @@ library(ciTools)
 library(plot3D)
 library(MuMIn)
 library(devtools)
-#library(ggbiplot)
+library(ggbiplot)
 library(pls)
 library(corrplot)
 library(ggiraphExtra)
@@ -33,6 +35,7 @@ library(car)
 library(class)
 library(gbm)
 library(randomForest)
+library(scatterplot3d)
 ```
 
 # Introduction
@@ -110,10 +113,200 @@ corrs <- cor(worldTrain)
 
 corrplot(corrs, tl.cex = 0.5)
 ```
+# EDA items
+
+Let me know what your thoughts on all this and if it's helpful, I did this using the `worldTrain` dataset.  Hoping this can influence the number of predictors we can select for the candidate models.  Assuming I'm reading all this correctly, it looks like 24 of the 54 predictors account for most of the variance in the dataset.  Taking this and coupling with the corrplot, I wonder if we can put a methodology in place to help in variable selection.
+
+## Principle Component Analysis (PCA)
+
+Look at Proportion of Variance and Cumulative Proportion we can see the amount of variation in each predictor and the cumulative variation.  Looking at PC28, we could say 90% of the variation is accounted from with that number of predictors.
+
+```{r}
+worldTrain.pca <- prcomp(worldTrain[,c(1:53)], center = TRUE, scale. = TRUE)
+summary(worldTrain.pca)
+```
+
+## Partial Least Squares (PLS) Analysis
+
+Similar to the PCA, what I'm seeing here, is that if we were to make a threshold determination, say we want 75% of the variance to be explained, then we could say we're looking to have about 26 predictors in the model.  The PLS plot below visualizes the numbers we're seeing as well.  Look furthering at the charts, perhaps 11 would be optimal?
+
+```{r}
+plswTmodel <- plsr(shares ~., data=worldTrain, scale=TRUE, validation="CV")
+summary(plswTmodel)
+```
+
+## PLS Plot
+
+Visualizing the data above, the plots suggest there are diminishing marginal returns from going beyond 11 predictors or so.  Looking at the R2, chart, is that suggesting based on the data the best R2 we can get is .02?
+
+```{r}
+validationplot(plswTmodel)
+validationplot(plswTmodel, val.type="MSEP")
+validationplot(plswTmodel, val.type="R2")
+```
+
+## BI Plot
+
+Curious what data is segmented from the main group.
+
+```{r}
+worldbiplot <- ggbiplot(worldTrain.pca, scale. = TRUE, var.scale = TRUE, obs.scale = TRUE, varname.size = 2, varname.adjust = 2)
+worldbiplot
+```
+
+## Multicollinearity Assessment
+
+A multicollinearity assessment was conducted to see if good predictors could also be selected based on this analysis.  Based on some guidance I found on-line, as a rule of thumb, a VIF value that exceeds 5 or 10 indicates a problematic amount of collinearity. 
+
+Of note, four predictors were removed as they had perfect collinearity.
+
+* `weekday_is_sunday`
+* `is_weekend`
+* `LDA_04`
+* `rate_negative_words`
+
+Based on the results below, 31 predictors fall below 5.
+
+```{r, echo=TRUE, eval=TRUE}
+WorldtrainFit1 <- lm(shares ~ timedelta + n_tokens_title + n_tokens_content + n_unique_tokens + 
+    n_non_stop_words + n_non_stop_unique_tokens + num_hrefs + 
+    num_self_hrefs + num_imgs + num_videos + average_token_length + 
+    num_keywords + kw_min_min + kw_max_min + kw_avg_min + kw_min_max + 
+    kw_max_max + kw_avg_max + kw_min_avg + kw_max_avg + kw_avg_avg + 
+    self_reference_min_shares + self_reference_max_shares + self_reference_avg_sharess + 
+    weekday_is_monday + weekday_is_tuesday + weekday_is_wednesday + 
+    weekday_is_thursday + weekday_is_friday + weekday_is_saturday + LDA_00 + LDA_01 + LDA_02 + 
+    LDA_03 + global_subjectivity + global_sentiment_polarity + 
+    global_rate_positive_words + global_rate_negative_words + 
+    rate_positive_words + avg_positive_polarity + 
+    min_positive_polarity + max_positive_polarity + avg_negative_polarity + 
+    min_negative_polarity + max_negative_polarity + title_subjectivity + 
+    title_sentiment_polarity + abs_title_subjectivity + abs_title_sentiment_polarity, data = worldTrain)
+car::vif(WorldtrainFit1)
+```
+
+
+## Linearity Assessment
+
+Full disclosure, I came across this doing research for homework 7.
+
+(http://www.sthda.com/english/articles/36-classification-methods-essentials/148-logistic-regression-assumptions-and-diagnostics-in-r/)
+
+It provided some helpful insights when the response variable is binary, and I'm not sure if it will be a value add for this project.  That being said maybe this helps with variable selection.  I'm also not 100% sure I'm interpreting the results correctly, but if the point is at the top of the chart, would that suggest the variable is a good predictor of the response?  It led me to select 11 predictors with the highest values on the charts. 
+
+```{r}
+# Fit the logistic regression model
+WorldtrainFit2 <- glm(shares ~ ., data = worldTrain, family = gaussian())
+
+# Predict the probability (p) of quality
+probabilities <- predict(WorldtrainFit2, type = "response")
+
+# Select only numeric predictors
+worldTrain2 <- worldTrain %>%
+  dplyr::select_if(is.numeric) 
+predictors <- colnames(worldTrain2)
+
+# Bind the logit and tidying the data for plot
+worldTrain2 <- worldTrain2 %>%
+  mutate(logit = log(probabilities/(1-probabilities))) %>%
+  gather(key = "predictors", value = "predictor.value", -logit)
+
+#create scatter plots
+ggplot(worldTrain2, aes(logit, predictor.value))+
+  geom_point(size = 0.5, alpha = 0.5) +
+  geom_smooth(method = "loess") + 
+  theme_bw() + 
+  facet_wrap(~predictors, scales = "free_y")
+```
+
+## Trying to see if there is another visualization that can assist with variable selection.
+
+Still playing around with this, seeing if there if there is any assistance selecting variables. 
+
+```{r}
+s3d <- scatterplot3d(worldTrain, type="p", highlight.3d=TRUE,
+                     angle=55, scale.y=0.7, pch=16, main="scatterplot3d - 5")
+```
+
 
 # Modeling
 
 In this section we're going to compare the following models: random forest, linear regression, and two ensemble models (we can fill this in when we decide which two to do). Each of the models will be trying to predict the amount of shares for each of the data channels. 
+
+
+## Dave's Attempt at Linear Models
+
+I played around with a few models based on the EDA information above.  Looking at the PLS plot, I assume .02 is the best R2 we can get with the data? The four  models below go in order from most to least amount of predictors.  I'm sure their is room for improvement here. 
+
+```{r}
+#Model 1 - all predictors
+worldtrainlmfit1 <- lm(shares ~ ., data = worldTrain)
+
+#Model 2 - selecting predictors from the Multicolinearity analysis - 31 predictors
+worldtrainlmfit2 <- lm(shares ~ timedelta + n_tokens_title + n_tokens_content + num_hrefs + num_self_hrefs +  num_imgs + num_videos + num_keywords + kw_min_min + kw_min_max + kw_avg_max + kw_min_avg + weekday_is_monday + weekday_is_tuesday + weekday_is_wednesday + weekday_is_thursday + weekday_is_friday + weekday_is_saturday + LDA_00 + LDA_01 + LDA_02 + LDA_03 + global_subjectivity + min_positive_polarity + max_positive_polarity + min_negative_polarity +  max_negative_polarity + title_subjectivity + title_sentiment_polarity + abs_title_subjectivity + abs_title_sentiment_polarity ,data = worldTrain)
+
+#Model 3 -  Selecting predictors from Linearity Assessment - 11 predictors
+worldtrainlmfit3 <- lm(shares ~ title_subjectivity + average_token_length + max_negative_polarity + is_weekend + kw_max_max + kw_min_avg + LDA_02 + min_negative_polarity + n_non_stop_unique_tokens + n_non_stop_words + global_rate_positive_words, data = worldTrain)
+
+#Model 4 -  Selecting predictors based on relevancy from ANOVA results after running the summary of the worldtrainlmfit0 model with all predictors - 4 predictors
+worldtrainglmfit4 <- lm(shares ~  num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain)
+```
+
+### LM Results
+
+I'm still in disbelief the adj-R2 is this low, but if the R2 in the PLS visualization is right, and .02 is the best we can aim for, then I guess it is what is.  So based on that model 3 or 4 would be good given the lower complexity.
+
+```{r}
+compareFitStats <- function(worldtrainlmfit1, worldtrainlmfit2, worldtrainlmfit3, worldtrainlmfit4){
+	require(MuMIn)
+	fitStats <- data.frame(fitStat = c("Adj R Square", "AIC", "AICc", "BIC"),
+	    col1 = round(c(summary(worldtrainlmfit1)$adj.r.squared, AIC(worldtrainlmfit1), 
+									MuMIn::AICc(worldtrainlmfit1), BIC(worldtrainlmfit1)), 3),
+			col2 = round(c(summary(worldtrainlmfit2)$adj.r.squared, AIC(worldtrainlmfit2), 
+									MuMIn::AICc(worldtrainlmfit2), BIC(worldtrainlmfit2)), 3),
+	    col3 = round(c(summary(worldtrainlmfit3)$adj.r.squared, AIC(worldtrainlmfit3), 
+									MuMIn::AICc(worldtrainlmfit3), BIC(worldtrainlmfit3)), 3),
+      col4 = round(c(summary(worldtrainlmfit4)$adj.r.squared, AIC(worldtrainlmfit4), 
+									MuMIn::AICc(worldtrainlmfit4), BIC(worldtrainlmfit4)), 3))
+	#put names on returned df
+	calls <- as.list(match.call())
+	calls[[1]] <- NULL
+	names(fitStats)[2:5] <- unlist(calls)
+	fitStats
+}
+
+compareFitStats(worldtrainlmfit1, worldtrainlmfit2, worldtrainlmfit3, worldtrainglmfit4)
+```
+#### Running models through Cross validation
+
+Running models through CV.  The all predictor model has the highest R2, but the 11 and 4 predictors are similar and much less complex.
+
+```{r}
+#all predictors
+fit1 <- train(shares ~ ., data = worldTrain, method = "lm", 
+         preProcess = c("center", "scale"),
+         trControl = trainControl(method = "cv", number = 10))
+
+#31 predictors
+fit2 <- train(shares ~ timedelta + n_tokens_title + n_tokens_content + num_hrefs + num_self_hrefs +  num_imgs + num_videos + num_keywords + kw_min_min + kw_min_max + kw_avg_max + kw_min_avg + weekday_is_monday + weekday_is_tuesday + weekday_is_wednesday + weekday_is_thursday + weekday_is_friday + weekday_is_saturday + LDA_00 + LDA_01 + LDA_02 + LDA_03 + global_subjectivity + min_positive_polarity + max_positive_polarity + min_negative_polarity +  max_negative_polarity + title_subjectivity + title_sentiment_polarity + abs_title_subjectivity + abs_title_sentiment_polarity , data = worldTrain, method = "lm", 
+         preProcess = c("center", "scale"),
+         trControl = trainControl(method = "cv", number = 10))
+
+#11 predictors
+fit3 <- train(shares ~ title_subjectivity + average_token_length + max_negative_polarity + is_weekend + kw_max_max + kw_min_avg + LDA_02 + min_negative_polarity + n_non_stop_unique_tokens + n_non_stop_words + global_rate_positive_words, data = worldTrain, method = "lm", 
+         preProcess = c("center", "scale"),
+         trControl = trainControl(method = "cv", number = 10))
+
+#4 predictors
+fit4 <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain, method = "lm", 
+         preProcess = c("center", "scale"),
+         trControl = trainControl(method = "cv", number = 10))
+
+fit1
+fit2
+fit3
+fit4
+```
 
 
 ## Random Forest
