@@ -5,16 +5,12 @@ date: "10/19/2021"
 output: github_document
 ---
 
+I don't think we need all of these libraries. We can keep them for now but the project doesn't require anything with SQL so those can be removed later.
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(rmarkdown)
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(knitr)
-library(readr)
-library(purrr)
 library(haven)
 library(readxl)
 library(devtools)
@@ -29,7 +25,7 @@ library(ciTools)
 library(plot3D)
 library(MuMIn)
 library(devtools)
-library(ggbiplot)
+#library(ggbiplot)
 library(pls)
 library(corrplot)
 library(ggiraphExtra)
@@ -38,6 +34,110 @@ library(class)
 library(gbm)
 library(randomForest)
 ```
+
+# Introduction
+
+We'll load in the (Online News Popularity Data Set)[https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity]  from the UCI Machine Learning Repository. From this data, we'll break it down into 6 different groups based on the data channel: lifestyle, entertainment, bus, socmed, tech, and world. 
+
+# Load Data and Make Groups
+
+```{r}
+news <- read_csv("OnlineNewsPopularity.csv")
+
+# Remove the url column from the dataset
+news <- news %>% select(!url)
+
+# Subset data and remove the data_channel_is columns
+## lifestyle
+lifestyle <- news %>% filter(data_channel_is_lifestyle == 1) %>% select(!c(data_channel_is_bus, data_channel_is_entertainment, data_channel_is_lifestyle, data_channel_is_socmed, data_channel_is_tech, data_channel_is_world))
+
+# entertainment
+entertainment <- news %>% filter(data_channel_is_entertainment == 1) %>% select(!c(data_channel_is_bus, data_channel_is_entertainment, data_channel_is_lifestyle, data_channel_is_socmed, data_channel_is_tech, data_channel_is_world))
+
+# bus
+bus <- news %>% filter(data_channel_is_bus == 1) %>% select(!c(data_channel_is_bus, data_channel_is_entertainment, data_channel_is_lifestyle, data_channel_is_socmed, data_channel_is_tech, data_channel_is_world))
+
+# socmed
+socmed <- news %>% filter(data_channel_is_socmed == 1) %>% select(!c(data_channel_is_bus, data_channel_is_entertainment, data_channel_is_lifestyle, data_channel_is_socmed, data_channel_is_tech, data_channel_is_world))
+
+# tech
+tech <- news %>% filter(data_channel_is_tech == 1) %>% select(!c(data_channel_is_bus, data_channel_is_entertainment, data_channel_is_lifestyle, data_channel_is_socmed, data_channel_is_tech, data_channel_is_world))
+
+# world
+world <- news %>% filter(data_channel_is_world == 1) %>% select(!c(data_channel_is_bus, data_channel_is_entertainment, data_channel_is_lifestyle, data_channel_is_socmed, data_channel_is_tech, data_channel_is_world))
+
+```
+
+# Summarizations
+```{r}
+# trying this with the world data set first.
+set.seed(55)
+trainIndex <- createDataPartition(world$shares, p = 0.7, list = FALSE)
+
+# bus
+busTrain <- bus[trainIndex, ]
+busTest <- bus[-trainIndex, ]
+
+# entertainment
+entertainTrain <- entertainment[trainIndex, ]
+entertainTest <- entertainment[-trainIndex, ]
+
+# lifestyle 
+lifestyleTrain <- lifestyle[trainIndex, ]
+lifestyleTest <- lifestyle[-trainIndex, ]
+
+# news 
+newsTrain <- news[trainIndex, ]
+newsTest <- news[-trainIndex, ]
+
+# socmed 
+socmedTrain <- socmed[trainIndex, ]
+socmedTest <- socmed[-trainIndex, ]
+
+# tech 
+techTrain <- tech[trainIndex, ]
+techTest <- tech[-trainIndex, ]
+
+# world
+worldTrain <- world[trainIndex, ]
+worldTest <- world[-trainIndex, ]
+```
+
+I was hoping to see the correlation plot for the variables to see what was most related to shares. Kind of rough with the large number of variables
+
+```{r}
+corrs <- cor(worldTrain)
+
+corrplot(corrs, tl.cex = 0.5)
+```
+
+# Modeling
+
+In this section we're going to compare the following models: random forest, linear regression, and two ensemble models (we can fill this in when we decide which two to do). Each of the models will be trying to predict the amount of shares for each of the data channels. 
+
+
+## Random Forest
+
+Tried to use all the variables, took forever to run. Initially had 10 cv and 1:15 trees. Made the cv to 5 and tried smaller mtry values but it still takes a long time. 
+
+```{r}
+set.seed(55)
+# takes forever to run
+# rfFit <- train(shares ~ ., data = worldTrain, method = "rf", trControl = trainControl(method = "cv", number = 5), tuneGrid = expand.grid(mtry = 1:8))
+```
+
+## Linear Regression
+```{r}
+
+```
+
+## Ensemble 
+```{r}
+
+```
+
+# Comparison
+
 
 ## Test for project 2
 
