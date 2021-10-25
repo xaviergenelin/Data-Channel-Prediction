@@ -27,7 +27,7 @@ library(ciTools)
 library(plot3D)
 library(MuMIn)
 library(devtools)
-library(ggbiplot)
+#library(ggbiplot)
 library(pls)
 library(corrplot)
 library(ggiraphExtra)
@@ -321,6 +321,11 @@ set.seed(55)
 
 ## Linear Regression
 ```{r}
+olsFit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain, trControl = trainControl(method = "cv", number = 5))
+
+olsPred <- predict(olsFit, worldTest)
+
+postResample(olsPred, obs = worldTest$shares)[2]
 
 ```
 
