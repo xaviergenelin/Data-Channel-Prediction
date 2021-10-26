@@ -10,7 +10,7 @@ I don't think we need all of these libraries. We can keep them for now but the p
 Dave:  Agree, one of my bad habits not pruning the list from one assignment to the other.
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(knitr)
 library(rmarkdown)
@@ -36,6 +36,11 @@ library(randomForest)
 
 We'll load in the (Online News Popularity Data Set)[https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity]  from the UCI Machine Learning Repository. From this data, we'll break it down into 6 different groups based on the data channel: lifestyle, entertainment, bus, socmed, tech, and world. 
 
+Libraries that are being used:  
+
+* `tidyverse`  
+* `caret`  
+
 
 # Load Data w/Automation
 ```{r}
@@ -53,11 +58,20 @@ news <- news %>%
                           if_else(data_channel_is_bus == 1, "bus", 
                                   if_else(data_channel_is_socmed == 1, "socmed", 
                                           if_else(data_channel_is_tech == 1, "tech", 
-                                                  if_else(data_channel_is_world == 1, "world", "other")))))))
+                                                  if_else(data_channel_is_world == 1, "world", "other")))))),
+        weekday = if_else(weekday_is_monday == 1, "Monday", 
+                          if_else(weekday_is_tuesday == 1, "Tuesday",
+                                  if_else(weekday_is_wednesday == 1, "Wednesday",
+                                          if_else(weekday_is_thursday == 1, "Thursday",
+                                                  if_else(weekday_is_friday == 1, "Friday",
+                                                          if_else(weekday_is_saturday == 1, "Saturday", "Sunday"))))))
+        )
 
 # Filter the news data set on the channel of interest
-# remove the url and data_channel_is_* columns
-news <- news %>% filter(data_channel == channel) %>% select(!c(url, starts_with("data_channel")))
+# remove the url and data_channel_is_* and weekday_is_* columns
+news <- news %>% filter(data_channel == channel) %>% select(!c(url, starts_with("data_channel"), starts_with("weekday_is")))
+
+
 
 # set seed for reproducibility
 set.seed(55)
@@ -96,8 +110,24 @@ p
 
 
 ### Graph 2
+```{r}
+# xavier. Not the best but I'll try and make it be a little more detailed
+ggplot(data = newsTrain, aes(x = ordered(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")), y = shares)) + 
+  geom_col() + 
+  labs(title = "Shares per Day", x = "Day", y = "Shares")
+```
+
+
 
 ### Graph 3
+
+```{r}
+# xavier
+ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
+  geom_point(aes(color = weekday)) +
+  labs(title = "Shares vs Number of Images", x = "Number of Images", y = "Shares")
+```
+
 
 ## Contingency Tables
 
@@ -118,6 +148,12 @@ xxx
 ```
 
 
+## Numerical Summary
+```{r}
+newsTrain %>% group_by(weekday) %>% summarise(Min = min(shares), Mean = mean(shares), Max = max(shares), SD = sd(shares))
+```
+
+
 
 # Modeling
 
@@ -131,8 +167,13 @@ Tried to use all the variables, took forever to run. Initially had 10 cv and 1:1
 
 ```{r}
 set.seed(55)
+now <- Sys.time()
 # takes forever to run
-# rfFit <- train(shares ~ ., data = worldTrain, method = "rf", trControl = trainControl(method = "cv", number = 5), tuneGrid = expand.grid(mtry = 1:8))
+rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_00 + LDA_01 + LDA_02 + LDA_03 + LDA_04, data = newsTrain, method = "rf", preProcess = c("center", "scale"), trControl = trainControl(method = "cv", number = 5), tuneGrid = expand.grid(mtry = 1:8))
+
+rfFit$results
+# took 14 minutes
+Sys.time() - now
 ```
 
 ## Linear Regression
@@ -147,18 +188,34 @@ postResample(pred1, obs = newsTest$shares)
 
 ```{r}
 # Xavier model
-olsFit <- train(shares ~ ., data = newsTrain, trControl = trainControl(method = "cv", number = 5))
+now <- Sys.time()
+olsFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_00 + LDA_01 + LDA_02 + LDA_03 + LDA_04, data = newsTrain, method = "lm", preProcess = c("center", "scale"), trControl = trainControl(method = "cv", number = 10))
 
 olsPred <- predict(olsFit, newsTest)
 
 postResample(olsPred, obs = newsTest$shares)[2]
+
+Sys.time() - now
 ```
+
+```{r}
+# poisson model
+now <- Sys.time()
+poissonFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_00 + LDA_01 + LDA_02 + LDA_03 + LDA_04, data = newsTrain, method = "glm", family = "poisson", preProcess = c("center", "scale"), trControl = trainControl(method = "cv", number = 10))
+
+poissonPred <- predict(poissonFit, newsTest)
+
+postResample(poissonPred, obs = newsTest$shares)[2]
+
+Sys.time() - now
+```
+
 
 ## Ensemble 
 
 ### Boosted Tree
 
-This is the boosted tree model using all predictors in the `worldTrain` data set.
+This is the boosted tree model using all predictors in the `newsTrain` data set.
 
 ```{r}
 set.seed(30)
@@ -186,7 +243,8 @@ xxxx
 Test
 
 ```{r, echo=TRUE, eval=FALSE}
-
+library(lares)
+corr_var(news, shares, top = 5)
 ```
 
 
