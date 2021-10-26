@@ -24,6 +24,11 @@ library(ciTools)
 library(plot3D)
 library(MuMIn)
 library(devtools)
+<<<<<<< HEAD
+=======
+#library(ggbiplot)
+library(pls)
+>>>>>>> 6b1b29f7af24ff7c58a74dee169b6ce0512a8473
 library(corrplot)
 library(car)
 library(class)
@@ -164,6 +169,7 @@ set.seed(55)
 
 ## Linear Regression
 ```{r}
+<<<<<<< HEAD
 #Model 1 -  Selecting predictors based on relevancy from ANOVA results after running the summary from model using all predictors in another model - 4 predictors
 worldtrainglmfit1 <- lm(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain)
 summary(worldtrainglmfit1)
@@ -176,6 +182,13 @@ model1 <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data =
                preProcess = c("center", "scale"),
                trControl = train.control)
 model1
+=======
+olsFit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain, trControl = trainControl(method = "cv", number = 5))
+
+olsPred <- predict(olsFit, worldTest)
+
+postResample(olsPred, obs = worldTest$shares)[2]
+>>>>>>> 6b1b29f7af24ff7c58a74dee169b6ce0512a8473
 
 #Running K-fold model against test set
 pred1 <- predict(model1, newdata = worldTest)
