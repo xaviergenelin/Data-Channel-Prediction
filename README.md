@@ -183,89 +183,15 @@ set.seed(55)
 
 ``` r
 #Model 1 -  Selecting predictors based on relevancy from ANOVA results after running the summary from model using all predictors in another model - 4 predictors
-worldtrainglmfit1 <- lm(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain)
-summary(worldtrainglmfit1)
+worldtrainglmfit <- lm(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
 ```
 
-    ## 
-    ## Call:
-    ## lm(formula = shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, 
-    ##     data = worldTrain)
-    ## 
-    ## Residuals:
-    ##    Min     1Q Median     3Q 
-    ##  -9169  -1476   -908   -258 
-    ##    Max 
-    ## 281255 
-    ## 
-    ## Coefficients:
-    ##               Estimate
-    ## (Intercept) -637.59318
-    ## num_imgs      75.91199
-    ## kw_min_avg    -0.73721
-    ## kw_max_avg    -0.21041
-    ## kw_avg_avg     1.72469
-    ##             Std. Error
-    ## (Intercept)  369.23966
-    ## num_imgs      16.27084
-    ## kw_min_avg     0.13224
-    ## kw_max_avg     0.04073
-    ## kw_avg_avg     0.23106
-    ##             t value Pr(>|t|)
-    ## (Intercept)  -1.727   0.0843
-    ## num_imgs      4.666 3.15e-06
-    ## kw_min_avg   -5.575 2.59e-08
-    ## kw_max_avg   -5.166 2.48e-07
-    ## kw_avg_avg    7.464 9.60e-14
-    ##                
-    ## (Intercept) .  
-    ## num_imgs    ***
-    ## kw_min_avg  ***
-    ## kw_max_avg  ***
-    ## kw_avg_avg  ***
-    ## ---
-    ## Signif. codes:  
-    ##   0 '***' 0.001 '**' 0.01
-    ##   '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Residual standard error: 6553 on 5895 degrees of freedom
-    ## Multiple R-squared:  0.01639,    Adjusted R-squared:  0.01572 
-    ## F-statistic: 24.56 on 4 and 5895 DF,  p-value: < 2.2e-16
+    ## Warning: In lm.fit(x, y, offset = offset, singular.ok = singular.ok, ...) :
+    ##  extra arguments 'trControl', 'preProcess' will be disregarded
 
 ``` r
-#Setting up k fold cross validation for lm
-set.seed(123) 
-train.control <- trainControl(method = "cv", number = 10)
+pred1 <- predict(worldtrainglmfit, newdata = worldTest)
 
-model1 <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain, method = "lm",
-               preProcess = c("center", "scale"),
-               trControl = train.control)
-model1
-```
-
-    ## Linear Regression 
-    ## 
-    ## 5900 samples
-    ##    4 predictor
-    ## 
-    ## Pre-processing: centered
-    ##  (4), scaled (4) 
-    ## Resampling: Cross-Validated (10 fold) 
-    ## Summary of sample sizes: 5309, 5310, 5311, 5310, 5309, 5311, ... 
-    ## Resampling results:
-    ## 
-    ##   RMSE      Rsquared  
-    ##   5758.578  0.01951015
-    ##   MAE    
-    ##   1971.97
-    ## 
-    ## Tuning parameter
-    ##  held constant at a value
-    ##  of TRUE
-
-``` r
-#Running K-fold model against test set
-pred1 <- predict(model1, newdata = worldTest)
 postResample(pred1, obs = worldTest$shares)
 ```
 
@@ -273,6 +199,18 @@ postResample(pred1, obs = worldTest$shares)
     ## 4.617892e+03 2.334528e-02 
     ##          MAE 
     ## 1.844947e+03
+
+``` r
+# Xavier model
+olsFit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain, trControl = trainControl(method = "cv", number = 5))
+
+olsPred <- predict(olsFit, worldTest)
+
+postResample(olsPred, obs = worldTest$shares)[2]
+```
+
+    ##   Rsquared 
+    ## 0.04166473
 
 ## Ensemble
 
@@ -875,12 +813,6 @@ wtFit
 #### Boosted Tree Test Results
 
 xxxx
-
-``` r
-#need to figure out why the error is occurring here
-#pred1 <- predict(wtFit, newdata = worldTest)
-#confusionMatrix(pred1, worldTest$shares)
-```
 
 # Comparison
 
