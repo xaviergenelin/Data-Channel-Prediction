@@ -2,7 +2,12 @@
 title: "Project 2"
 author: "Group 6, Xavier Genelin, Dave Bergeron"
 date: "10/19/2021"
-output: github_document
+output: 
+  github_document:
+    html_preview: FALSE
+    toc: TRUE
+#params:
+  #channel: channel
 ---
 
 I don't think we need all of these libraries. We can keep them for now but the project doesn't require anything with SQL so those can be removed later.
@@ -71,7 +76,7 @@ news <- news %>%
 # remove the url and data_channel_is_* and weekday_is_* columns
 news <- news %>% filter(data_channel == channel) %>% select(!c(url, starts_with("data_channel"), starts_with("weekday_is")))
 
-
+news$weekday <- factor(news$weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
 
 # set seed for reproducibility
 set.seed(55)
@@ -188,28 +193,24 @@ postResample(pred1, obs = newsTest$shares)
 
 ```{r}
 # Xavier model
-now <- Sys.time()
-olsFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_00 + LDA_01 + LDA_02 + LDA_03 + LDA_04, data = newsTrain, method = "lm", preProcess = c("center", "scale"), trControl = trainControl(method = "cv", number = 10))
+olsFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, method = "lm", preProcess = c("center", "scale"), trControl = trainControl(method = "cv", number = 10))
 
 olsPred <- predict(olsFit, newsTest)
 
 postResample(olsPred, obs = newsTest$shares)[2]
 
-Sys.time() - now
 ```
 
 ```{r}
 # poisson model
-now <- Sys.time()
-poissonFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_00 + LDA_01 + LDA_02 + LDA_03 + LDA_04, data = newsTrain, method = "glm", family = "poisson", preProcess = c("center", "scale"), trControl = trainControl(method = "cv", number = 10))
+poissonFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, method = "glm", family = "poisson", preProcess = c("center", "scale"), trControl = trainControl(method = "cv", number = 10))
 
 poissonPred <- predict(poissonFit, newsTest)
 
 postResample(poissonPred, obs = newsTest$shares)[2]
-
-Sys.time() - now
 ```
 
+Not much of a difference between the linear model and poisson
 
 ## Ensemble 
 
@@ -244,7 +245,7 @@ Test
 
 ```{r, echo=TRUE, eval=FALSE}
 library(lares)
-corr_var(news, shares, top = 5)
+corr_var(news, shares)
 ```
 
 
