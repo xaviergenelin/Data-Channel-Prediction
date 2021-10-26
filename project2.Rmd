@@ -36,74 +36,46 @@ library(randomForest)
 
 We'll load in the (Online News Popularity Data Set)[https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity]  from the UCI Machine Learning Repository. From this data, we'll break it down into 6 different groups based on the data channel: lifestyle, entertainment, bus, socmed, tech, and world. 
 
-# Load Data and Make Groups
 
+# Load Data w/Automation
 ```{r}
+# load in the data
 news <- read_csv("OnlineNewsPopularity.csv")
 
-# Remove the url column from the dataset
-news <- news %>% select(!url)
+#### this will be part of the overall parameters but we can change this as we go forward for different datasets
+channel <- "world"
 
-# Subset data and remove the data_channel_is columns
-## lifestyle
-lifestyle <- news %>% filter(data_channel_is_lifestyle == 1) %>% select(!c(data_channel_is_bus, data_channel_is_entertainment, data_channel_is_lifestyle, data_channel_is_socmed, data_channel_is_tech, data_channel_is_world))
+# create a new column for the data channel
+news <- news %>% 
+ mutate(data_channel = 
+          if_else(data_channel_is_lifestyle == 1, "lifestyle", 
+                  if_else(data_channel_is_entertainment == 1, "entertainment", 
+                          if_else(data_channel_is_bus == 1, "bus", 
+                                  if_else(data_channel_is_socmed == 1, "socmed", 
+                                          if_else(data_channel_is_tech == 1, "tech", 
+                                                  if_else(data_channel_is_world == 1, "world", "other")))))))
 
-# entertainment
-entertainment <- news %>% filter(data_channel_is_entertainment == 1) %>% select(!c(data_channel_is_bus, data_channel_is_entertainment, data_channel_is_lifestyle, data_channel_is_socmed, data_channel_is_tech, data_channel_is_world))
+# Filter the news data set on the channel of interest
+# remove the url and data_channel_is_* columns
+news <- news %>% filter(data_channel == channel) %>% select(!c(url, starts_with("data_channel")))
 
-# bus
-bus <- news %>% filter(data_channel_is_bus == 1) %>% select(!c(data_channel_is_bus, data_channel_is_entertainment, data_channel_is_lifestyle, data_channel_is_socmed, data_channel_is_tech, data_channel_is_world))
+# set seed for reproducibility
+set.seed(55)
 
-# socmed
-socmed <- news %>% filter(data_channel_is_socmed == 1) %>% select(!c(data_channel_is_bus, data_channel_is_entertainment, data_channel_is_lifestyle, data_channel_is_socmed, data_channel_is_tech, data_channel_is_world))
+# create a list of indicies for the training set
+trainIndex <- createDataPartition(news$shares, p = 0.7, list = FALSE)
 
-# tech
-tech <- news %>% filter(data_channel_is_tech == 1) %>% select(!c(data_channel_is_bus, data_channel_is_entertainment, data_channel_is_lifestyle, data_channel_is_socmed, data_channel_is_tech, data_channel_is_world))
-
-# world
-world <- news %>% filter(data_channel_is_world == 1) %>% select(!c(data_channel_is_bus, data_channel_is_entertainment, data_channel_is_lifestyle, data_channel_is_socmed, data_channel_is_tech, data_channel_is_world))
-
+# make training and test sets
+newsTrain <- news[trainIndex, ]
+newsTest <- news[-trainIndex, ]
 ```
 
 # Summarizations
-```{r}
-# trying this with the world data set first.
-set.seed(55)
-trainIndex <- createDataPartition(world$shares, p = 0.7, list = FALSE)
-
-# bus
-busTrain <- bus[trainIndex, ]
-busTest <- bus[-trainIndex, ]
-
-# entertainment
-entertainTrain <- entertainment[trainIndex, ]
-entertainTest <- entertainment[-trainIndex, ]
-
-# lifestyle 
-lifestyleTrain <- lifestyle[trainIndex, ]
-lifestyleTest <- lifestyle[-trainIndex, ]
-
-# news 
-newsTrain <- news[trainIndex, ]
-newsTest <- news[-trainIndex, ]
-
-# socmed 
-socmedTrain <- socmed[trainIndex, ]
-socmedTest <- socmed[-trainIndex, ]
-
-# tech 
-techTrain <- tech[trainIndex, ]
-techTest <- tech[-trainIndex, ]
-
-# world
-worldTrain <- world[trainIndex, ]
-worldTest <- world[-trainIndex, ]
-```
 
 I was hoping to see the correlation plot for the variables to see what was most related to shares. Kind of rough with the large number of variables
 
 ```{r}
-corrs <- cor(worldTrain)
+corrs <- cor(newsTrain)
 
 corrplot(corrs, tl.cex = 0.5)
 ```
@@ -134,7 +106,7 @@ p
 Shows token count in titles on Mondays 
 
 ```{r, eval=TRUE, echo=TRUE}
-table(worldTrain$n_tokens_title, worldTrain$weekday_is_monday)
+table(newsTrain$n_tokens_title, newsTrain$weekday_is_monday)
 ```
 
 ### 3-Way Contingency Table
@@ -166,20 +138,20 @@ set.seed(55)
 ## Linear Regression
 ```{r}
 #Model 1 -  Selecting predictors based on relevancy from ANOVA results after running the summary from model using all predictors in another model - 4 predictors
-worldtrainglmfit <- lm(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+worldtrainglmfit <- lm(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
 
-pred1 <- predict(worldtrainglmfit, newdata = worldTest)
+pred1 <- predict(worldtrainglmfit, newdata = newsTest)
 
-postResample(pred1, obs = worldTest$shares)
+postResample(pred1, obs = newsTest$shares)
 ```
 
 ```{r}
 # Xavier model
-olsFit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain, trControl = trainControl(method = "cv", number = 5))
+olsFit <- train(shares ~ ., data = newsTrain, trControl = trainControl(method = "cv", number = 5))
 
-olsPred <- predict(olsFit, worldTest)
+olsPred <- predict(olsFit, newsTest)
 
-postResample(olsPred, obs = worldTest$shares)[2]
+postResample(olsPred, obs = newsTest$shares)[2]
 ```
 
 ## Ensemble 
@@ -190,7 +162,7 @@ This is the boosted tree model using all predictors in the `worldTrain` data set
 
 ```{r}
 set.seed(30)
-wtFit <- train(shares ~ ., data = worldTrain,
+wtFit <- train(shares ~ ., data = newsTrain,
                method = "gbm",
                preProcess = c("center", "scale"),
                trControl = trainControl(method = "cv",
