@@ -105,665 +105,60 @@ corrs <- cor(worldTrain)
 corrplot(corrs, tl.cex = 0.5)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-166-1.png)<!-- --> \# EDA
-items
+![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
-Let me know what your thoughts on all this and if it’s helpful, I did
-this using the `worldTrain` dataset. Hoping this can influence the
-number of predictors we can select for the candidate models. Assuming
-I’m reading all this correctly, it looks like 24 of the 54 predictors
-account for most of the variance in the dataset. Taking this and
-coupling with the corrplot, I wonder if we can put a methodology in
-place to help in variable selection.
+# EDA items
 
-## Principle Component Analysis (PCA)
+## Graphs
 
-Look at Proportion of Variance and Cumulative Proportion we can see the
-amount of variation in each predictor and the cumulative variation.
-Looking at PC28, we could say 90% of the variation is accounted from
-with that number of predictors.
+### Graph 1
 
 ``` r
-worldTrain.pca <- prcomp(worldTrain[,c(1:53)], center = TRUE, scale. = TRUE)
-summary(worldTrain.pca)
+# still working on this...need to play around with the data a bit more.
+p <- ggplot(worldTrain, aes(x=shares)) + 
+  geom_boxplot() + coord_flip()
+p
 ```
 
-    ## Importance of components:
-    ##                           PC1
-    ## Standard deviation     2.5392
-    ## Proportion of Variance 0.1216
-    ## Cumulative Proportion  0.1216
-    ##                            PC2
-    ## Standard deviation     1.94294
-    ## Proportion of Variance 0.07123
-    ## Cumulative Proportion  0.19288
-    ##                            PC3
-    ## Standard deviation     1.81167
-    ## Proportion of Variance 0.06193
-    ## Cumulative Proportion  0.25481
-    ##                           PC4
-    ## Standard deviation     1.7135
-    ## Proportion of Variance 0.0554
-    ## Cumulative Proportion  0.3102
-    ##                           PC5
-    ## Standard deviation     1.6296
-    ## Proportion of Variance 0.0501
-    ## Cumulative Proportion  0.3603
-    ##                            PC6
-    ## Standard deviation     1.56728
-    ## Proportion of Variance 0.04635
-    ## Cumulative Proportion  0.40665
-    ##                            PC7
-    ## Standard deviation     1.47358
-    ## Proportion of Variance 0.04097
-    ## Cumulative Proportion  0.44762
-    ##                            PC8
-    ## Standard deviation     1.43988
-    ## Proportion of Variance 0.03912
-    ## Cumulative Proportion  0.48674
-    ##                            PC9
-    ## Standard deviation     1.41682
-    ## Proportion of Variance 0.03787
-    ## Cumulative Proportion  0.52462
-    ##                           PC10
-    ## Standard deviation     1.29639
-    ## Proportion of Variance 0.03171
-    ## Cumulative Proportion  0.55633
-    ##                           PC11
-    ## Standard deviation     1.19912
-    ## Proportion of Variance 0.02713
-    ## Cumulative Proportion  0.58346
-    ##                           PC12
-    ## Standard deviation     1.16304
-    ## Proportion of Variance 0.02552
-    ## Cumulative Proportion  0.60898
-    ##                          PC13
-    ## Standard deviation     1.1135
-    ## Proportion of Variance 0.0234
-    ## Cumulative Proportion  0.6324
-    ##                           PC14
-    ## Standard deviation     1.11007
-    ## Proportion of Variance 0.02325
-    ## Cumulative Proportion  0.65562
-    ##                           PC15
-    ## Standard deviation     1.09709
-    ## Proportion of Variance 0.02271
-    ## Cumulative Proportion  0.67833
-    ##                           PC16
-    ## Standard deviation     1.07397
-    ## Proportion of Variance 0.02176
-    ## Cumulative Proportion  0.70010
-    ##                           PC17
-    ## Standard deviation     1.06349
-    ## Proportion of Variance 0.02134
-    ## Cumulative Proportion  0.72144
-    ##                          PC18
-    ## Standard deviation     1.0424
-    ## Proportion of Variance 0.0205
-    ## Cumulative Proportion  0.7419
-    ##                           PC19
-    ## Standard deviation     1.03879
-    ## Proportion of Variance 0.02036
-    ## Cumulative Proportion  0.76230
-    ##                           PC20
-    ## Standard deviation     1.02043
-    ## Proportion of Variance 0.01965
-    ## Cumulative Proportion  0.78195
-    ##                           PC21
-    ## Standard deviation     1.00846
-    ## Proportion of Variance 0.01919
-    ## Cumulative Proportion  0.80113
-    ##                           PC22
-    ## Standard deviation     0.97196
-    ## Proportion of Variance 0.01782
-    ## Cumulative Proportion  0.81896
-    ##                           PC23
-    ## Standard deviation     0.95456
-    ## Proportion of Variance 0.01719
-    ## Cumulative Proportion  0.83615
-    ##                           PC24
-    ## Standard deviation     0.92484
-    ## Proportion of Variance 0.01614
-    ## Cumulative Proportion  0.85229
-    ##                           PC25
-    ## Standard deviation     0.90202
-    ## Proportion of Variance 0.01535
-    ## Cumulative Proportion  0.86764
-    ##                           PC26
-    ## Standard deviation     0.82488
-    ## Proportion of Variance 0.01284
-    ## Cumulative Proportion  0.88048
-    ##                           PC27
-    ## Standard deviation     0.80679
-    ## Proportion of Variance 0.01228
-    ## Cumulative Proportion  0.89276
-    ##                           PC28
-    ## Standard deviation     0.76976
-    ## Proportion of Variance 0.01118
-    ## Cumulative Proportion  0.90394
-    ##                           PC29
-    ## Standard deviation     0.73219
-    ## Proportion of Variance 0.01012
-    ## Cumulative Proportion  0.91405
-    ##                           PC30
-    ## Standard deviation     0.72581
-    ## Proportion of Variance 0.00994
-    ## Cumulative Proportion  0.92399
-    ##                           PC31
-    ## Standard deviation     0.70322
-    ## Proportion of Variance 0.00933
-    ## Cumulative Proportion  0.93333
-    ##                           PC32
-    ## Standard deviation     0.69635
-    ## Proportion of Variance 0.00915
-    ## Cumulative Proportion  0.94247
-    ##                           PC33
-    ## Standard deviation     0.66002
-    ## Proportion of Variance 0.00822
-    ## Cumulative Proportion  0.95069
-    ##                           PC34
-    ## Standard deviation     0.64626
-    ## Proportion of Variance 0.00788
-    ## Cumulative Proportion  0.95857
-    ##                           PC35
-    ## Standard deviation     0.63956
-    ## Proportion of Variance 0.00772
-    ## Cumulative Proportion  0.96629
-    ##                           PC36
-    ## Standard deviation     0.56940
-    ## Proportion of Variance 0.00612
-    ## Cumulative Proportion  0.97241
-    ##                           PC37
-    ## Standard deviation     0.54604
-    ## Proportion of Variance 0.00563
-    ## Cumulative Proportion  0.97803
-    ##                          PC38
-    ## Standard deviation     0.4936
-    ## Proportion of Variance 0.0046
-    ## Cumulative Proportion  0.9826
-    ##                           PC39
-    ## Standard deviation     0.44843
-    ## Proportion of Variance 0.00379
-    ## Cumulative Proportion  0.98643
-    ##                           PC40
-    ## Standard deviation     0.40303
-    ## Proportion of Variance 0.00306
-    ## Cumulative Proportion  0.98949
-    ##                           PC41
-    ## Standard deviation     0.34617
-    ## Proportion of Variance 0.00226
-    ## Cumulative Proportion  0.99175
-    ##                          PC42
-    ## Standard deviation     0.3412
-    ## Proportion of Variance 0.0022
-    ## Cumulative Proportion  0.9940
-    ##                           PC43
-    ## Standard deviation     0.27517
-    ## Proportion of Variance 0.00143
-    ## Cumulative Proportion  0.99538
-    ##                           PC44
-    ## Standard deviation     0.26981
-    ## Proportion of Variance 0.00137
-    ## Cumulative Proportion  0.99675
-    ##                           PC45
-    ## Standard deviation     0.23567
-    ## Proportion of Variance 0.00105
-    ## Cumulative Proportion  0.99780
-    ##                           PC46
-    ## Standard deviation     0.19887
-    ## Proportion of Variance 0.00075
-    ## Cumulative Proportion  0.99854
-    ##                           PC47
-    ## Standard deviation     0.17000
-    ## Proportion of Variance 0.00055
-    ## Cumulative Proportion  0.99909
-    ##                           PC48
-    ## Standard deviation     0.16723
-    ## Proportion of Variance 0.00053
-    ## Cumulative Proportion  0.99962
-    ##                           PC49
-    ## Standard deviation     0.14261
-    ## Proportion of Variance 0.00038
-    ## Cumulative Proportion  1.00000
-    ##                             PC50
-    ## Standard deviation     5.528e-09
-    ## Proportion of Variance 0.000e+00
-    ## Cumulative Proportion  1.000e+00
-    ##                             PC51
-    ## Standard deviation     1.225e-12
-    ## Proportion of Variance 0.000e+00
-    ## Cumulative Proportion  1.000e+00
-    ##                             PC52
-    ## Standard deviation     2.429e-15
-    ## Proportion of Variance 0.000e+00
-    ## Cumulative Proportion  1.000e+00
-    ##                             PC53
-    ## Standard deviation     1.297e-15
-    ## Proportion of Variance 0.000e+00
-    ## Cumulative Proportion  1.000e+00
+![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
-## Partial Least Squares (PLS) Analysis
+### Graph 2
 
-Similar to the PCA, what I’m seeing here, is that if we were to make a
-threshold determination, say we want 75% of the variance to be
-explained, then we could say we’re looking to have about 26 predictors
-in the model. The PLS plot below visualizes the numbers we’re seeing as
-well. Look furthering at the charts, perhaps 11 would be optimal?
+### Graph 3
+
+## Contingency Tables
+
+### 2-way Contingency Table
+
+Shows token count in titles on Mondays
 
 ``` r
-plswTmodel <- plsr(shares ~., data=worldTrain, scale=TRUE, validation="CV")
-summary(plswTmodel)
+table(worldTrain$n_tokens_title, worldTrain$weekday_is_monday)
 ```
 
-    ## Data:    X dimension: 5900 53 
-    ##  Y dimension: 5900 1
-    ## Fit method: kernelpls
-    ## Number of components considered: 53
-    ## 
-    ## VALIDATION: RMSEP
-    ## Cross-validated using 10 random segments.
-    ##        (Intercept)  1 comps
-    ## CV            6606     6562
-    ## adjCV         6606     6560
-    ##        2 comps  3 comps
-    ## CV        6556     6562
-    ## adjCV     6554     6558
-    ##        4 comps  5 comps
-    ## CV        6557     6561
-    ## adjCV     6554     6557
-    ##        6 comps  7 comps
-    ## CV        6559     6550
-    ## adjCV     6555     6547
-    ##        8 comps  9 comps
-    ## CV        6551     6549
-    ## adjCV     6547     6545
-    ##        10 comps  11 comps
-    ## CV         6546      6543
-    ## adjCV      6543      6539
-    ##        12 comps  13 comps
-    ## CV         6541      6542
-    ## adjCV      6538      6539
-    ##        14 comps  15 comps
-    ## CV         6544      6544
-    ## adjCV      6540      6540
-    ##        16 comps  17 comps
-    ## CV         6544      6543
-    ## adjCV      6541      6540
-    ##        18 comps  19 comps
-    ## CV         6544      6542
-    ## adjCV      6540      6539
-    ##        20 comps  21 comps
-    ## CV         6542      6543
-    ## adjCV      6539      6539
-    ##        22 comps  23 comps
-    ## CV         6543      6543
-    ## adjCV      6540      6540
-    ##        24 comps  25 comps
-    ## CV         6543      6543
-    ## adjCV      6539      6540
-    ##        26 comps  27 comps
-    ## CV         6543      6543
-    ## adjCV      6539      6539
-    ##        28 comps  29 comps
-    ## CV         6543      6543
-    ## adjCV      6540      6539
-    ##        30 comps  31 comps
-    ## CV         6543      6543
-    ## adjCV      6540      6540
-    ##        32 comps  33 comps
-    ## CV         6543      6543
-    ## adjCV      6540      6539
-    ##        34 comps  35 comps
-    ## CV         6543      6543
-    ## adjCV      6540      6540
-    ##        36 comps  37 comps
-    ## CV         6543      6543
-    ## adjCV      6539      6539
-    ##        38 comps  39 comps
-    ## CV         6543      6543
-    ## adjCV      6540      6540
-    ##        40 comps  41 comps
-    ## CV         6543      6543
-    ## adjCV      6539      6539
-    ##        42 comps  43 comps
-    ## CV         6543      6543
-    ## adjCV      6539      6539
-    ##        44 comps  45 comps
-    ## CV         6543      6543
-    ## adjCV      6539      6539
-    ##        46 comps  47 comps
-    ## CV         6543      6543
-    ## adjCV      6539      6539
-    ##        48 comps  49 comps
-    ## CV         6543      6543
-    ## adjCV      6539      6539
-    ##        50 comps  51 comps
-    ## CV         6545      6545
-    ## adjCV      6541      6541
-    ##        52 comps  53 comps
-    ## CV         6545      6545
-    ## adjCV      6541      6541
-    ## 
-    ## TRAINING: % variance explained
-    ##         1 comps  2 comps
-    ## X         5.669    9.797
-    ## shares    2.279    2.841
-    ##         3 comps  4 comps
-    ## X        16.063   23.676
-    ## shares    3.029    3.165
-    ##         5 comps  6 comps
-    ## X        29.141   32.186
-    ## shares    3.274    3.404
-    ##         7 comps  8 comps
-    ## X         34.84   37.041
-    ## shares     3.53    3.632
-    ##         9 comps  10 comps
-    ## X        40.306    42.960
-    ## shares    3.669     3.707
-    ##         11 comps  12 comps
-    ## X         46.146    48.454
-    ## shares     3.743     3.775
-    ##         13 comps  14 comps
-    ## X         51.981    54.404
-    ## shares     3.783     3.793
-    ##         15 comps  16 comps
-    ## X         57.083    59.377
-    ## shares     3.802     3.809
-    ##         17 comps  18 comps
-    ## X         60.783    62.566
-    ## shares     3.815     3.817
-    ##         19 comps  20 comps
-    ## X         65.065    67.018
-    ## shares     3.818     3.819
-    ##         21 comps  22 comps
-    ## X          68.34    70.064
-    ## shares      3.82     3.821
-    ##         23 comps  24 comps
-    ## X         71.385    72.738
-    ## shares     3.821     3.822
-    ##         25 comps  26 comps
-    ## X         73.953    75.127
-    ## shares     3.822     3.822
-    ##         27 comps  28 comps
-    ## X         76.078    77.230
-    ## shares     3.822     3.822
-    ##         29 comps  30 comps
-    ## X         78.543    79.573
-    ## shares     3.822     3.822
-    ##         31 comps  32 comps
-    ## X         80.773    81.912
-    ## shares     3.822     3.822
-    ##         33 comps  34 comps
-    ## X         83.036    84.291
-    ## shares     3.822     3.822
-    ##         35 comps  36 comps
-    ## X         85.802    86.548
-    ## shares     3.822     3.822
-    ##         37 comps  38 comps
-    ## X         87.257    88.835
-    ## shares     3.822     3.822
-    ##         39 comps  40 comps
-    ## X         89.983    91.383
-    ## shares     3.822     3.822
-    ##         41 comps  42 comps
-    ## X         92.525    93.560
-    ## shares     3.822     3.822
-    ##         43 comps  44 comps
-    ## X         95.038    95.736
-    ## shares     3.822     3.822
-    ##         45 comps  46 comps
-    ## X         96.967    98.130
-    ## shares     3.822     3.822
-    ##         47 comps  48 comps
-    ## X         98.464    99.020
-    ## shares     3.822     3.822
-    ##         49 comps  50 comps
-    ## X        100.000   100.000
-    ## shares     3.822     3.827
-    ##         51 comps  52 comps
-    ## X        100.000   100.000
-    ## shares     3.827     3.827
-    ##         53 comps
-    ## X        100.000
-    ## shares     3.827
+    ##     
+    ##        0   1
+    ##   4    2   0
+    ##   5   14   2
+    ##   6   73  21
+    ##   7  216  32
+    ##   8  467  95
+    ##   9  728 155
+    ##   10 915 185
+    ##   11 919 184
+    ##   12 719 136
+    ##   13 497  76
+    ##   14 239  26
+    ##   15 113  17
+    ##   16  42   5
+    ##   17  15   3
+    ##   18   2   0
+    ##   19   1   0
+    ##   23   1   0
 
-## PLS Plot
+### 3-Way Contingency Table
 
-Visualizing the data above, the plots suggest there are diminishing
-marginal returns from going beyond 11 predictors or so. Looking at the
-R2, chart, is that suggesting based on the data the best R2 we can get
-is .02?
-
-``` r
-validationplot(plswTmodel)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-169-1.png)<!-- -->
-
-``` r
-validationplot(plswTmodel, val.type="MSEP")
-```
-
-![](README_files/figure-gfm/unnamed-chunk-169-2.png)<!-- -->
-
-``` r
-validationplot(plswTmodel, val.type="R2")
-```
-
-![](README_files/figure-gfm/unnamed-chunk-169-3.png)<!-- -->
-
-## BI Plot
-
-Curious what data is segmented from the main group.
-
-``` r
-worldbiplot <- ggbiplot(worldTrain.pca, scale. = TRUE, var.scale = TRUE, obs.scale = TRUE, varname.size = 2, varname.adjust = 2)
-worldbiplot
-```
-
-![](README_files/figure-gfm/unnamed-chunk-170-1.png)<!-- -->
-
-## Multicollinearity Assessment
-
-A multicollinearity assessment was conducted to see if good predictors
-could also be selected based on this analysis. Based on some guidance I
-found on-line, as a rule of thumb, a VIF value that exceeds 5 or 10
-indicates a problematic amount of collinearity.
-
-Of note, four predictors were removed as they had perfect collinearity.
-
--   `weekday_is_sunday`
--   `is_weekend`
--   `LDA_04`
--   `rate_negative_words`
-
-Based on the results below, 31 predictors fall below 5.
-
-``` r
-WorldtrainFit1 <- lm(shares ~ timedelta + n_tokens_title + n_tokens_content + n_unique_tokens + 
-    n_non_stop_words + n_non_stop_unique_tokens + num_hrefs + 
-    num_self_hrefs + num_imgs + num_videos + average_token_length + 
-    num_keywords + kw_min_min + kw_max_min + kw_avg_min + kw_min_max + 
-    kw_max_max + kw_avg_max + kw_min_avg + kw_max_avg + kw_avg_avg + 
-    self_reference_min_shares + self_reference_max_shares + self_reference_avg_sharess + 
-    weekday_is_monday + weekday_is_tuesday + weekday_is_wednesday + 
-    weekday_is_thursday + weekday_is_friday + weekday_is_saturday + LDA_00 + LDA_01 + LDA_02 + 
-    LDA_03 + global_subjectivity + global_sentiment_polarity + 
-    global_rate_positive_words + global_rate_negative_words + 
-    rate_positive_words + avg_positive_polarity + 
-    min_positive_polarity + max_positive_polarity + avg_negative_polarity + 
-    min_negative_polarity + max_negative_polarity + title_subjectivity + 
-    title_sentiment_polarity + abs_title_subjectivity + abs_title_sentiment_polarity, data = worldTrain)
-car::vif(WorldtrainFit1)
-```
-
-    ##                    timedelta 
-    ##                     2.062281 
-    ##               n_tokens_title 
-    ##                     1.128119 
-    ##             n_tokens_content 
-    ##                     3.178254 
-    ##              n_unique_tokens 
-    ##                    22.602556 
-    ##             n_non_stop_words 
-    ##                    29.738825 
-    ##     n_non_stop_unique_tokens 
-    ##                    22.660074 
-    ##                    num_hrefs 
-    ##                     1.461584 
-    ##               num_self_hrefs 
-    ##                     1.221517 
-    ##                     num_imgs 
-    ##                     1.397207 
-    ##                   num_videos 
-    ##                     1.091875 
-    ##         average_token_length 
-    ##                    17.249426 
-    ##                 num_keywords 
-    ##                     1.600270 
-    ##                   kw_min_min 
-    ##                     4.085505 
-    ##                   kw_max_min 
-    ##                    17.061694 
-    ##                   kw_avg_min 
-    ##                    16.534917 
-    ##                   kw_min_max 
-    ##                     1.672174 
-    ##                   kw_max_max 
-    ##                     5.263357 
-    ##                   kw_avg_max 
-    ##                     2.801744 
-    ##                   kw_min_avg 
-    ##                     2.357512 
-    ##                   kw_max_avg 
-    ##                     7.191672 
-    ##                   kw_avg_avg 
-    ##                     7.834453 
-    ##    self_reference_min_shares 
-    ##                     8.378571 
-    ##    self_reference_max_shares 
-    ##                     8.031901 
-    ##   self_reference_avg_sharess 
-    ##                    21.771775 
-    ##            weekday_is_monday 
-    ##                     2.938842 
-    ##           weekday_is_tuesday 
-    ##                     3.174650 
-    ##         weekday_is_wednesday 
-    ##                     3.200225 
-    ##          weekday_is_thursday 
-    ##                     3.179367 
-    ##            weekday_is_friday 
-    ##                     2.890727 
-    ##          weekday_is_saturday 
-    ##                     1.841520 
-    ##                       LDA_00 
-    ##                     1.276095 
-    ##                       LDA_01 
-    ##                     1.174545 
-    ##                       LDA_02 
-    ##                     1.883109 
-    ##                       LDA_03 
-    ##                     1.609372 
-    ##          global_subjectivity 
-    ##                     2.872123 
-    ##    global_sentiment_polarity 
-    ##                     9.250418 
-    ##   global_rate_positive_words 
-    ##                     5.922295 
-    ##   global_rate_negative_words 
-    ##                     6.956681 
-    ##          rate_positive_words 
-    ##                    15.658674 
-    ##        avg_positive_polarity 
-    ##                     5.795009 
-    ##        min_positive_polarity 
-    ##                     1.831673 
-    ##        max_positive_polarity 
-    ##                     3.133388 
-    ##        avg_negative_polarity 
-    ##                     5.905792 
-    ##        min_negative_polarity 
-    ##                     4.213842 
-    ##        max_negative_polarity 
-    ##                     2.278010 
-    ##           title_subjectivity 
-    ##                     2.535236 
-    ##     title_sentiment_polarity 
-    ##                     1.153746 
-    ##       abs_title_subjectivity 
-    ##                     1.456135 
-    ## abs_title_sentiment_polarity 
-    ##                     2.254761
-
-## Linearity Assessment
-
-Full disclosure, I came across this doing research for homework 7.
-
-(<http://www.sthda.com/english/articles/36-classification-methods-essentials/148-logistic-regression-assumptions-and-diagnostics-in-r/>)
-
-It provided some helpful insights when the response variable is binary,
-and I’m not sure if it will be a value add for this project. That being
-said maybe this helps with variable selection. I’m also not 100% sure
-I’m interpreting the results correctly, but if the point is at the top
-of the chart, would that suggest the variable is a good predictor of the
-response? It led me to select 11 predictors with the highest values on
-the charts.
-
-``` r
-# Fit the logistic regression model
-WorldtrainFit2 <- glm(shares ~ ., data = worldTrain, family = gaussian())
-
-# Predict the probability (p) of quality
-probabilities <- predict(WorldtrainFit2, type = "response")
-
-# Select only numeric predictors
-worldTrain2 <- worldTrain %>%
-  dplyr::select_if(is.numeric) 
-predictors <- colnames(worldTrain2)
-
-# Bind the logit and tidying the data for plot
-worldTrain2 <- worldTrain2 %>%
-  mutate(logit = log(probabilities/(1-probabilities))) %>%
-  gather(key = "predictors", value = "predictor.value", -logit)
-```
-
-    ## Warning in log(probabilities/
-    ## (1 - probabilities)): NaNs
-    ## produced
-
-``` r
-#create scatter plots
-ggplot(worldTrain2, aes(logit, predictor.value))+
-  geom_point(size = 0.5, alpha = 0.5) +
-  geom_smooth(method = "loess") + 
-  theme_bw() + 
-  facet_wrap(~predictors, scales = "free_y")
-```
-
-    ## `geom_smooth()` using formula 'y ~ x'
-
-    ## Warning: Removed 318546 rows
-    ## containing non-finite
-    ## values (stat_smooth).
-
-    ## Warning: Removed 318546 rows
-    ## containing missing values
-    ## (geom_point).
-
-![](README_files/figure-gfm/unnamed-chunk-172-1.png)<!-- -->
-
-## Trying to see if there is another visualization that can assist with variable selection.
-
-Still playing around with this, seeing if there if there is any
-assistance selecting variables.
-
-``` r
-s3d <- scatterplot3d(worldTrain, type="p", highlight.3d=TRUE,
-                     angle=55, scale.y=0.7, pch=16, main="scatterplot3d - 5")
-```
-
-![](README_files/figure-gfm/unnamed-chunk-173-1.png)<!-- -->
+xxx
 
 # Modeling
 
@@ -771,265 +166,6 @@ In this section we’re going to compare the following models: random
 forest, linear regression, and two ensemble models (we can fill this in
 when we decide which two to do). Each of the models will be trying to
 predict the amount of shares for each of the data channels.
-
-## Dave’s Attempt at Linear Models
-
-I played around with a few models based on the EDA information above.
-Looking at the PLS plot, I assume .02 is the best R2 we can get with the
-data? The four models below go in order from most to least amount of
-predictors. I’m sure their is room for improvement here.
-
-``` r
-#Model 1 - all predictors
-worldtrainlmfit1 <- lm(shares ~ ., data = worldTrain)
-
-#Model 2 - selecting predictors from the Multicolinearity analysis - 31 predictors
-worldtrainlmfit2 <- lm(shares ~ timedelta + n_tokens_title + n_tokens_content + num_hrefs + num_self_hrefs +  num_imgs + num_videos + num_keywords + kw_min_min + kw_min_max + kw_avg_max + kw_min_avg + weekday_is_monday + weekday_is_tuesday + weekday_is_wednesday + weekday_is_thursday + weekday_is_friday + weekday_is_saturday + LDA_00 + LDA_01 + LDA_02 + LDA_03 + global_subjectivity + min_positive_polarity + max_positive_polarity + min_negative_polarity +  max_negative_polarity + title_subjectivity + title_sentiment_polarity + abs_title_subjectivity + abs_title_sentiment_polarity ,data = worldTrain)
-
-#Model 3 -  Selecting predictors from Linearity Assessment - 11 predictors
-worldtrainlmfit3 <- lm(shares ~ title_subjectivity + average_token_length + max_negative_polarity + is_weekend + kw_max_max + kw_min_avg + LDA_02 + min_negative_polarity + n_non_stop_unique_tokens + n_non_stop_words + global_rate_positive_words, data = worldTrain)
-
-#Model 4 -  Selecting predictors based on relevancy from ANOVA results after running the summary of the worldtrainlmfit0 model with all predictors - 4 predictors
-worldtrainglmfit4 <- lm(shares ~  num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain)
-```
-
-### LM Results
-
-I’m still in disbelief the adj-R2 is this low, but if the R2 in the PLS
-visualization is right, and .02 is the best we can aim for, then I guess
-it is what is. So based on that model 3 or 4 would be good given the
-lower complexity.
-
-``` r
-compareFitStats <- function(worldtrainlmfit1, worldtrainlmfit2, worldtrainlmfit3, worldtrainlmfit4){
-    require(MuMIn)
-    fitStats <- data.frame(fitStat = c("Adj R Square", "AIC", "AICc", "BIC"),
-        col1 = round(c(summary(worldtrainlmfit1)$adj.r.squared, AIC(worldtrainlmfit1), 
-                                    MuMIn::AICc(worldtrainlmfit1), BIC(worldtrainlmfit1)), 3),
-            col2 = round(c(summary(worldtrainlmfit2)$adj.r.squared, AIC(worldtrainlmfit2), 
-                                    MuMIn::AICc(worldtrainlmfit2), BIC(worldtrainlmfit2)), 3),
-        col3 = round(c(summary(worldtrainlmfit3)$adj.r.squared, AIC(worldtrainlmfit3), 
-                                    MuMIn::AICc(worldtrainlmfit3), BIC(worldtrainlmfit3)), 3),
-      col4 = round(c(summary(worldtrainlmfit4)$adj.r.squared, AIC(worldtrainlmfit4), 
-                                    MuMIn::AICc(worldtrainlmfit4), BIC(worldtrainlmfit4)), 3))
-    #put names on returned df
-    calls <- as.list(match.call())
-    calls[[1]] <- NULL
-    names(fitStats)[2:5] <- unlist(calls)
-    fitStats
-}
-
-compareFitStats(worldtrainlmfit1, worldtrainlmfit2, worldtrainlmfit3, worldtrainglmfit4)
-```
-
-    ##        fitStat
-    ## 1 Adj R Square
-    ## 2          AIC
-    ## 3         AICc
-    ## 4          BIC
-    ##   worldtrainlmfit1
-    ## 1             0.03
-    ## 2        120402.41
-    ## 3        120403.32
-    ## 4        120743.23
-    ##   worldtrainlmfit2
-    ## 1            0.019
-    ## 2       120451.336
-    ## 3       120451.719
-    ## 4       120671.866
-    ##   worldtrainlmfit3
-    ## 1            0.017
-    ## 2       120444.351
-    ## 3       120444.412
-    ## 4       120531.226
-    ##   worldtrainglmfit4
-    ## 1             0.016
-    ## 2        120444.832
-    ## 3        120444.846
-    ## 4        120484.928
-
-#### Running models through Cross validation
-
-Running models through CV. The all predictor model has the highest R2,
-but the 11 and 4 predictors are similar and much less complex.
-
-``` r
-#all predictors
-fit1 <- train(shares ~ ., data = worldTrain, method = "lm", 
-         preProcess = c("center", "scale"),
-         trControl = trainControl(method = "cv", number = 10))
-```
-
-    ## Warning in
-    ## predict.lm(modelFit,
-    ## newdata): prediction from
-    ## a rank-deficient fit may be
-    ## misleading
-
-    ## Warning in
-    ## predict.lm(modelFit,
-    ## newdata): prediction from
-    ## a rank-deficient fit may be
-    ## misleading
-
-    ## Warning in
-    ## predict.lm(modelFit,
-    ## newdata): prediction from
-    ## a rank-deficient fit may be
-    ## misleading
-
-    ## Warning in
-    ## predict.lm(modelFit,
-    ## newdata): prediction from
-    ## a rank-deficient fit may be
-    ## misleading
-
-    ## Warning in
-    ## predict.lm(modelFit,
-    ## newdata): prediction from
-    ## a rank-deficient fit may be
-    ## misleading
-
-    ## Warning in
-    ## predict.lm(modelFit,
-    ## newdata): prediction from
-    ## a rank-deficient fit may be
-    ## misleading
-
-    ## Warning in
-    ## predict.lm(modelFit,
-    ## newdata): prediction from
-    ## a rank-deficient fit may be
-    ## misleading
-
-    ## Warning in
-    ## predict.lm(modelFit,
-    ## newdata): prediction from
-    ## a rank-deficient fit may be
-    ## misleading
-
-    ## Warning in
-    ## predict.lm(modelFit,
-    ## newdata): prediction from
-    ## a rank-deficient fit may be
-    ## misleading
-
-    ## Warning in
-    ## predict.lm(modelFit,
-    ## newdata): prediction from
-    ## a rank-deficient fit may be
-    ## misleading
-
-``` r
-#31 predictors
-fit2 <- train(shares ~ timedelta + n_tokens_title + n_tokens_content + num_hrefs + num_self_hrefs +  num_imgs + num_videos + num_keywords + kw_min_min + kw_min_max + kw_avg_max + kw_min_avg + weekday_is_monday + weekday_is_tuesday + weekday_is_wednesday + weekday_is_thursday + weekday_is_friday + weekday_is_saturday + LDA_00 + LDA_01 + LDA_02 + LDA_03 + global_subjectivity + min_positive_polarity + max_positive_polarity + min_negative_polarity +  max_negative_polarity + title_subjectivity + title_sentiment_polarity + abs_title_subjectivity + abs_title_sentiment_polarity , data = worldTrain, method = "lm", 
-         preProcess = c("center", "scale"),
-         trControl = trainControl(method = "cv", number = 10))
-
-#11 predictors
-fit3 <- train(shares ~ title_subjectivity + average_token_length + max_negative_polarity + is_weekend + kw_max_max + kw_min_avg + LDA_02 + min_negative_polarity + n_non_stop_unique_tokens + n_non_stop_words + global_rate_positive_words, data = worldTrain, method = "lm", 
-         preProcess = c("center", "scale"),
-         trControl = trainControl(method = "cv", number = 10))
-
-#4 predictors
-fit4 <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain, method = "lm", 
-         preProcess = c("center", "scale"),
-         trControl = trainControl(method = "cv", number = 10))
-
-fit1
-```
-
-    ## Linear Regression 
-    ## 
-    ## 5900 samples
-    ##   53 predictor
-    ## 
-    ## Pre-processing:
-    ##  centered (53), scaled (53) 
-    ## Resampling: Cross-Validated (10 fold) 
-    ## Summary of sample sizes: 5309, 5310, 5311, 5310, 5310, 5309, ... 
-    ## Resampling results:
-    ## 
-    ##   RMSE      Rsquared 
-    ##   6005.922  0.0285787
-    ##   MAE     
-    ##   2034.246
-    ## 
-    ## Tuning parameter
-    ##  held constant at a value
-    ##  of TRUE
-
-``` r
-fit2
-```
-
-    ## Linear Regression 
-    ## 
-    ## 5900 samples
-    ##   31 predictor
-    ## 
-    ## Pre-processing:
-    ##  centered (31), scaled (31) 
-    ## Resampling: Cross-Validated (10 fold) 
-    ## Summary of sample sizes: 5310, 5309, 5310, 5310, 5311, 5310, ... 
-    ## Resampling results:
-    ## 
-    ##   RMSE      Rsquared  
-    ##   5906.167  0.01983723
-    ##   MAE    
-    ##   1990.08
-    ## 
-    ## Tuning parameter
-    ##  held constant at a value
-    ##  of TRUE
-
-``` r
-fit3
-```
-
-    ## Linear Regression 
-    ## 
-    ## 5900 samples
-    ##   11 predictor
-    ## 
-    ## Pre-processing:
-    ##  centered (11), scaled (11) 
-    ## Resampling: Cross-Validated (10 fold) 
-    ## Summary of sample sizes: 5311, 5308, 5310, 5310, 5310, 5310, ... 
-    ## Resampling results:
-    ## 
-    ##   RMSE      Rsquared  
-    ##   5994.033  0.02003624
-    ##   MAE     
-    ##   1981.811
-    ## 
-    ## Tuning parameter
-    ##  held constant at a value
-    ##  of TRUE
-
-``` r
-fit4
-```
-
-    ## Linear Regression 
-    ## 
-    ## 5900 samples
-    ##    4 predictor
-    ## 
-    ## Pre-processing: centered
-    ##  (4), scaled (4) 
-    ## Resampling: Cross-Validated (10 fold) 
-    ## Summary of sample sizes: 5311, 5308, 5309, 5311, 5309, 5310, ... 
-    ## Resampling results:
-    ## 
-    ##   RMSE      Rsquared  
-    ##   6136.009  0.01974806
-    ##   MAE     
-    ##   1968.072
-    ## 
-    ## Tuning parameter
-    ##  held constant at a value
-    ##  of TRUE
 
 ## Random Forest
 
@@ -1045,7 +181,706 @@ set.seed(55)
 
 ## Linear Regression
 
+``` r
+#Model 1 -  Selecting predictors based on relevancy from ANOVA results after running the summary from model using all predictors in another model - 4 predictors
+worldtrainglmfit1 <- lm(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain)
+summary(worldtrainglmfit1)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, 
+    ##     data = worldTrain)
+    ## 
+    ## Residuals:
+    ##    Min     1Q Median     3Q 
+    ##  -9169  -1476   -908   -258 
+    ##    Max 
+    ## 281255 
+    ## 
+    ## Coefficients:
+    ##               Estimate
+    ## (Intercept) -637.59318
+    ## num_imgs      75.91199
+    ## kw_min_avg    -0.73721
+    ## kw_max_avg    -0.21041
+    ## kw_avg_avg     1.72469
+    ##             Std. Error
+    ## (Intercept)  369.23966
+    ## num_imgs      16.27084
+    ## kw_min_avg     0.13224
+    ## kw_max_avg     0.04073
+    ## kw_avg_avg     0.23106
+    ##             t value Pr(>|t|)
+    ## (Intercept)  -1.727   0.0843
+    ## num_imgs      4.666 3.15e-06
+    ## kw_min_avg   -5.575 2.59e-08
+    ## kw_max_avg   -5.166 2.48e-07
+    ## kw_avg_avg    7.464 9.60e-14
+    ##                
+    ## (Intercept) .  
+    ## num_imgs    ***
+    ## kw_min_avg  ***
+    ## kw_max_avg  ***
+    ## kw_avg_avg  ***
+    ## ---
+    ## Signif. codes:  
+    ##   0 '***' 0.001 '**' 0.01
+    ##   '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 6553 on 5895 degrees of freedom
+    ## Multiple R-squared:  0.01639,    Adjusted R-squared:  0.01572 
+    ## F-statistic: 24.56 on 4 and 5895 DF,  p-value: < 2.2e-16
+
+``` r
+#Setting up k fold cross validation for lm
+set.seed(123) 
+train.control <- trainControl(method = "cv", number = 10)
+
+model1 <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = worldTrain, method = "lm",
+               preProcess = c("center", "scale"),
+               trControl = train.control)
+model1
+```
+
+    ## Linear Regression 
+    ## 
+    ## 5900 samples
+    ##    4 predictor
+    ## 
+    ## Pre-processing: centered
+    ##  (4), scaled (4) 
+    ## Resampling: Cross-Validated (10 fold) 
+    ## Summary of sample sizes: 5309, 5310, 5311, 5310, 5309, 5311, ... 
+    ## Resampling results:
+    ## 
+    ##   RMSE      Rsquared  
+    ##   5758.578  0.01951015
+    ##   MAE    
+    ##   1971.97
+    ## 
+    ## Tuning parameter
+    ##  held constant at a value
+    ##  of TRUE
+
+``` r
+#Running K-fold model against test set
+pred1 <- predict(model1, newdata = worldTest)
+postResample(pred1, obs = worldTest$shares)
+```
+
+    ##         RMSE     Rsquared 
+    ## 4.617892e+03 2.334528e-02 
+    ##          MAE 
+    ## 1.844947e+03
+
 ## Ensemble
+
+### Boosted Tree
+
+This is the boosted tree model using all predictors in the `worldTrain`
+data set.
+
+``` r
+set.seed(30)
+wtFit <- train(shares ~ ., data = worldTrain,
+               method = "gbm",
+               preProcess = c("center", "scale"),
+               trControl = trainControl(method = "cv",
+                                        number = 5),
+               tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25), .interaction.depth = seq(1, 4, by = 1), .shrinkage = (0.1), .n.minobsinnode = (10)))
+```
+
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 50899820.4566             nan     0.1000 17684.3620
+    ##      2 50653601.9102             nan     0.1000 22934.2934
+    ##      3 50485570.3182             nan     0.1000 -47516.4553
+    ##      4 50282519.9131             nan     0.1000 31366.2773
+    ##      5 50167179.3130             nan     0.1000 90280.0754
+    ##      6 50031640.7140             nan     0.1000 27392.4491
+    ##      7 49975016.7538             nan     0.1000 36862.2624
+    ##      8 49902240.9559             nan     0.1000 50010.0461
+    ##      9 49788325.8502             nan     0.1000 -56959.4391
+    ##     10 49704622.0814             nan     0.1000 -86604.0887
+    ##     20 49025885.6713             nan     0.1000 -9317.3772
+    ##     40 48169643.9211             nan     0.1000 -70382.1604
+    ##     60 47487684.9265             nan     0.1000 -14733.3054
+    ##     80 46720299.4195             nan     0.1000 -190200.0253
+    ##    100 46014071.3454             nan     0.1000 6769.5000
+    ##    120 45597984.7723             nan     0.1000 -58964.6780
+    ##    140 44997137.4197             nan     0.1000 8930.4542
+    ##    160 44469802.5432             nan     0.1000 -24410.3072
+    ##    180 43855065.5571             nan     0.1000 13520.2944
+    ##    200 43296794.3200             nan     0.1000 52171.5990
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 51008284.8225             nan     0.1000 36455.5721
+    ##      2 50719396.8564             nan     0.1000 89766.5695
+    ##      3 50619172.6633             nan     0.1000 87028.1550
+    ##      4 50369978.2726             nan     0.1000 76954.5469
+    ##      5 49857555.5442             nan     0.1000 -36460.9139
+    ##      6 49639257.6154             nan     0.1000 131583.9260
+    ##      7 49387982.0721             nan     0.1000 -21731.7456
+    ##      8 49262550.9913             nan     0.1000 29708.3585
+    ##      9 48754535.6494             nan     0.1000 74621.6424
+    ##     10 48554775.2426             nan     0.1000 -31709.9445
+    ##     20 46416312.9173             nan     0.1000 58403.1138
+    ##     40 42814962.0646             nan     0.1000 -145392.5054
+    ##     60 40672833.1553             nan     0.1000 23054.1743
+    ##     80 38910947.8401             nan     0.1000 -69982.3795
+    ##    100 37207929.4490             nan     0.1000 -67138.0928
+    ##    120 35885294.5143             nan     0.1000 -24994.2237
+    ##    140 34873002.3737             nan     0.1000 -54844.0348
+    ##    160 33693860.0693             nan     0.1000 -70193.2027
+    ##    180 32555934.1315             nan     0.1000 -45485.0213
+    ##    200 31893486.7786             nan     0.1000 -131348.6937
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 50561039.3467             nan     0.1000 38786.0723
+    ##      2 50371254.7702             nan     0.1000 58810.0509
+    ##      3 50097971.5404             nan     0.1000 -8269.2922
+    ##      4 49841345.9676             nan     0.1000 -74497.9123
+    ##      5 49159414.3143             nan     0.1000 -34180.6735
+    ##      6 48646664.0616             nan     0.1000 157886.0998
+    ##      7 48278561.1118             nan     0.1000 -13911.7689
+    ##      8 47660348.4526             nan     0.1000 -112095.2355
+    ##      9 47228822.1962             nan     0.1000 -109290.9529
+    ##     10 46949618.2413             nan     0.1000 19041.2623
+    ##     20 44709396.0464             nan     0.1000 -188664.0701
+    ##     40 41501574.8826             nan     0.1000 -101630.4759
+    ##     60 38844240.2130             nan     0.1000 -24119.8255
+    ##     80 36659564.9380             nan     0.1000 -206316.1934
+    ##    100 34486584.5538             nan     0.1000 -19698.3016
+    ##    120 32894541.5292             nan     0.1000 -32933.3318
+    ##    140 30977033.7337             nan     0.1000 9985.5918
+    ##    160 29688502.9607             nan     0.1000 -44513.9043
+    ##    180 28583797.6964             nan     0.1000 -52397.8274
+    ##    200 27474601.5113             nan     0.1000 -30745.0880
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 50517451.8593             nan     0.1000 -26503.9506
+    ##      2 50203973.3805             nan     0.1000 22358.2211
+    ##      3 49655940.5853             nan     0.1000 229060.2390
+    ##      4 49033314.6462             nan     0.1000 105005.8123
+    ##      5 48606989.1828             nan     0.1000 28470.5574
+    ##      6 48038942.1602             nan     0.1000 -119591.4081
+    ##      7 47623841.3408             nan     0.1000 -45795.1178
+    ##      8 47304440.5408             nan     0.1000 -150600.2526
+    ##      9 47072110.0198             nan     0.1000 44143.5148
+    ##     10 46668896.3596             nan     0.1000 -17897.3874
+    ##     20 43013986.0202             nan     0.1000 -141608.4051
+    ##     40 38725185.2792             nan     0.1000 -5586.4350
+    ##     60 35920537.8302             nan     0.1000 -5680.1103
+    ##     80 33223389.2172             nan     0.1000 -87531.4761
+    ##    100 31341808.2716             nan     0.1000 -181074.2809
+    ##    120 29819235.4219             nan     0.1000 -65521.9165
+    ##    140 28173677.5537             nan     0.1000 -47630.8842
+    ##    160 26791993.8499             nan     0.1000 -53852.3662
+    ##    180 25732568.3123             nan     0.1000 -70844.1305
+    ##    200 24449558.4558             nan     0.1000 -20807.3354
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 48827105.6930             nan     0.1000 6232.3436
+    ##      2 48586580.1556             nan     0.1000 47223.3300
+    ##      3 48343679.1879             nan     0.1000 -66235.7328
+    ##      4 48251880.0657             nan     0.1000 92939.3200
+    ##      5 48110410.6837             nan     0.1000 -48656.0265
+    ##      6 47970137.7615             nan     0.1000 71765.6793
+    ##      7 47877043.1822             nan     0.1000 38591.9458
+    ##      8 47750317.7415             nan     0.1000 -55626.5531
+    ##      9 47650219.1951             nan     0.1000 -76160.3247
+    ##     10 47553221.2313             nan     0.1000 -72290.0390
+    ##     20 46872707.7742             nan     0.1000 -140033.7263
+    ##     40 45917192.3952             nan     0.1000 -28463.1623
+    ##     60 45250531.1963             nan     0.1000 18212.6470
+    ##     80 44606947.0450             nan     0.1000 -86152.2442
+    ##    100 43897175.5342             nan     0.1000 -23986.4021
+    ##    120 43315628.1489             nan     0.1000 -75148.2490
+    ##    140 42889083.9673             nan     0.1000 9197.2295
+    ##    160 42435911.0358             nan     0.1000 14228.0555
+    ##    180 42013429.3910             nan     0.1000 -56493.7682
+    ##    200 41492800.4173             nan     0.1000 69355.4934
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 48689806.5362             nan     0.1000 40225.4033
+    ##      2 48115077.3013             nan     0.1000 -17356.9241
+    ##      3 47960995.9159             nan     0.1000 -3144.0980
+    ##      4 47775181.6858             nan     0.1000 162282.2728
+    ##      5 47294294.8425             nan     0.1000 -92113.7080
+    ##      6 46811751.7965             nan     0.1000 -153509.5692
+    ##      7 46657487.8055             nan     0.1000 71044.0190
+    ##      8 46504648.7958             nan     0.1000 -4653.8063
+    ##      9 46164052.1843             nan     0.1000 -73046.8045
+    ##     10 46020859.3703             nan     0.1000 15043.4061
+    ##     20 44326239.6515             nan     0.1000 32268.1603
+    ##     40 41976062.4937             nan     0.1000 -143596.1746
+    ##     60 39708557.6719             nan     0.1000 -35774.1849
+    ##     80 37654124.3864             nan     0.1000 -41157.8787
+    ##    100 36004085.0982             nan     0.1000 -21378.6696
+    ##    120 34666222.9283             nan     0.1000 -93774.2613
+    ##    140 33703206.9472             nan     0.1000 -9387.0293
+    ##    160 32747113.1008             nan     0.1000 -110164.4643
+    ##    180 31712742.4603             nan     0.1000 16086.9008
+    ##    200 30768036.6339             nan     0.1000 -19438.7844
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 48251637.1244             nan     0.1000 92337.5547
+    ##      2 47883469.7921             nan     0.1000 31889.1788
+    ##      3 47276227.5632             nan     0.1000 17383.9935
+    ##      4 46706825.5848             nan     0.1000 -3156.3335
+    ##      5 46536745.2878             nan     0.1000 83343.7288
+    ##      6 46198394.7784             nan     0.1000 -32468.6501
+    ##      7 45783787.9107             nan     0.1000 -140027.0344
+    ##      8 45300421.6151             nan     0.1000 -30564.3566
+    ##      9 44922627.8839             nan     0.1000 -96180.3379
+    ##     10 44704259.7955             nan     0.1000 -32325.2805
+    ##     20 41981006.5963             nan     0.1000 42559.4171
+    ##     40 38161066.1345             nan     0.1000 105669.2799
+    ##     60 35784739.9310             nan     0.1000 2248.1531
+    ##     80 34012905.2000             nan     0.1000 -103126.0900
+    ##    100 31698030.8620             nan     0.1000 -136319.2542
+    ##    120 29794579.8548             nan     0.1000 -117840.4291
+    ##    140 28638257.4229             nan     0.1000 -104054.0021
+    ##    160 27463795.6183             nan     0.1000 -98366.1972
+    ##    180 26462849.0603             nan     0.1000 -649.6493
+    ##    200 25537311.5392             nan     0.1000 32700.5854
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 48599870.3163             nan     0.1000 38938.9907
+    ##      2 47948209.4969             nan     0.1000 -46229.5698
+    ##      3 47712623.5535             nan     0.1000 53509.1286
+    ##      4 46992454.9465             nan     0.1000 61853.9879
+    ##      5 46683540.8371             nan     0.1000 -61434.5248
+    ##      6 46333746.1270             nan     0.1000 40314.5511
+    ##      7 45771640.8463             nan     0.1000 -113100.8550
+    ##      8 45243360.7187             nan     0.1000 -99963.2618
+    ##      9 44709894.0515             nan     0.1000 -131376.2846
+    ##     10 44489670.8694             nan     0.1000 -10327.9880
+    ##     20 42412067.8580             nan     0.1000 -360478.1058
+    ##     40 38460384.5565             nan     0.1000 -161448.4917
+    ##     60 35127116.6646             nan     0.1000 54287.6841
+    ##     80 32943275.4628             nan     0.1000 -3942.0433
+    ##    100 31026513.1498             nan     0.1000 -15549.6229
+    ##    120 28771284.7452             nan     0.1000 -53670.7612
+    ##    140 27323496.4515             nan     0.1000 -79126.6847
+    ##    160 25508557.9654             nan     0.1000 -38373.5459
+    ##    180 24499168.6241             nan     0.1000 -16776.9116
+    ##    200 23271112.3740             nan     0.1000 1520.3105
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 28938548.8946             nan     0.1000 46492.0978
+    ##      2 28816696.3699             nan     0.1000 40472.8491
+    ##      3 28751691.6855             nan     0.1000 65234.2103
+    ##      4 28684189.7715             nan     0.1000 21748.4476
+    ##      5 28649172.1260             nan     0.1000 6530.6030
+    ##      6 28575788.1024             nan     0.1000 9115.5936
+    ##      7 28504406.7864             nan     0.1000 -7924.3293
+    ##      8 28432538.9206             nan     0.1000 13271.9305
+    ##      9 28387442.3626             nan     0.1000 33559.3762
+    ##     10 28333059.4825             nan     0.1000 5793.8694
+    ##     20 27901533.5211             nan     0.1000 7203.2905
+    ##     40 27454032.5064             nan     0.1000 -24662.4882
+    ##     60 27154686.8418             nan     0.1000 -13187.8926
+    ##     80 26984435.1535             nan     0.1000 -43745.0127
+    ##    100 26795885.4903             nan     0.1000 7145.3000
+    ##    120 26669544.8856             nan     0.1000 -40671.4812
+    ##    140 26546097.6788             nan     0.1000 -27556.9979
+    ##    160 26436467.5654             nan     0.1000 -25322.2538
+    ##    180 26351270.6358             nan     0.1000 -17094.6844
+    ##    200 26223165.0204             nan     0.1000 -28936.7743
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 28821978.7195             nan     0.1000 45669.0712
+    ##      2 28593123.8926             nan     0.1000 15646.6010
+    ##      3 28420396.0818             nan     0.1000 41923.4364
+    ##      4 28309380.2347             nan     0.1000 -7548.8029
+    ##      5 28195415.8835             nan     0.1000 43275.5663
+    ##      6 27979004.3406             nan     0.1000 37684.4635
+    ##      7 27832976.1234             nan     0.1000 -6101.0402
+    ##      8 27536682.9795             nan     0.1000 -34646.8024
+    ##      9 27433831.1604             nan     0.1000 44804.8877
+    ##     10 27321767.2207             nan     0.1000 -17194.2787
+    ##     20 26259235.9585             nan     0.1000 -41109.5662
+    ##     40 25053713.5531             nan     0.1000 -9636.6125
+    ##     60 24291315.8135             nan     0.1000 34369.5007
+    ##     80 23653700.9381             nan     0.1000 -36795.8206
+    ##    100 23296221.0469             nan     0.1000 -4851.2972
+    ##    120 22821914.0736             nan     0.1000 -35873.4877
+    ##    140 22461074.7935             nan     0.1000 -53665.3125
+    ##    160 22091887.7052             nan     0.1000 -26679.4562
+    ##    180 21574100.1888             nan     0.1000 -34304.5919
+    ##    200 21143719.2802             nan     0.1000 -57656.4231
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 28697312.9439             nan     0.1000 26607.9743
+    ##      2 28276938.4570             nan     0.1000 -25740.4063
+    ##      3 28067798.5728             nan     0.1000 34987.8799
+    ##      4 27979576.3382             nan     0.1000 -12858.7482
+    ##      5 27718990.4831             nan     0.1000 2618.7538
+    ##      6 27542479.1599             nan     0.1000 122261.9873
+    ##      7 27305550.0267             nan     0.1000 28888.3250
+    ##      8 27167231.7016             nan     0.1000 17170.9034
+    ##      9 26963292.7202             nan     0.1000 39915.5117
+    ##     10 26757021.4178             nan     0.1000 -17546.5146
+    ##     20 25277077.5220             nan     0.1000 -42065.2334
+    ##     40 23101696.1686             nan     0.1000 -16910.7857
+    ##     60 22023418.8999             nan     0.1000 -129298.4251
+    ##     80 20984163.4626             nan     0.1000 -37333.3000
+    ##    100 20029152.0374             nan     0.1000 -22694.5833
+    ##    120 19542865.9809             nan     0.1000 -14410.8401
+    ##    140 18702341.4419             nan     0.1000 -40639.3680
+    ##    160 18047888.4251             nan     0.1000 -23315.6211
+    ##    180 17422848.1328             nan     0.1000 -28689.0305
+    ##    200 16767754.9399             nan     0.1000 -51920.5701
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 28702706.9276             nan     0.1000 129094.0007
+    ##      2 28409664.9438             nan     0.1000 -30835.4767
+    ##      3 28211785.4858             nan     0.1000 65425.6802
+    ##      4 27831254.8664             nan     0.1000 10224.0164
+    ##      5 27614888.0230             nan     0.1000 -18026.3279
+    ##      6 27509067.3140             nan     0.1000 9383.2557
+    ##      7 27246053.3070             nan     0.1000 -57705.4313
+    ##      8 26985620.4381             nan     0.1000 -58540.3220
+    ##      9 26694706.9898             nan     0.1000 6495.7410
+    ##     10 26525787.5326             nan     0.1000 4676.8043
+    ##     20 24717501.3946             nan     0.1000 -50659.8384
+    ##     40 22207609.0456             nan     0.1000 -36886.9515
+    ##     60 20690074.0947             nan     0.1000 -25865.8941
+    ##     80 19683610.1516             nan     0.1000 -60555.0656
+    ##    100 18726910.0008             nan     0.1000 -25985.1543
+    ##    120 17666544.2163             nan     0.1000 -49335.0649
+    ##    140 16614222.9529             nan     0.1000 -17606.0572
+    ##    160 15982424.0022             nan     0.1000 -5006.0909
+    ##    180 15343193.4269             nan     0.1000 -47891.0126
+    ##    200 14632182.6063             nan     0.1000 -15306.7948
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 51868452.1575             nan     0.1000 -11426.5914
+    ##      2 51628367.1193             nan     0.1000 88971.4598
+    ##      3 51500061.2986             nan     0.1000 47844.1227
+    ##      4 51293560.1332             nan     0.1000 -12229.4501
+    ##      5 51189467.9238             nan     0.1000 -6128.9619
+    ##      6 51138181.1116             nan     0.1000 -12603.8959
+    ##      7 51025772.5185             nan     0.1000 104571.5497
+    ##      8 50918187.1124             nan     0.1000 102125.4490
+    ##      9 50755808.5636             nan     0.1000 -39379.1869
+    ##     10 50678157.2642             nan     0.1000 -23433.6107
+    ##     20 50002741.8582             nan     0.1000 -26601.2487
+    ##     40 49121977.7298             nan     0.1000 81208.0896
+    ##     60 48281263.9076             nan     0.1000 12663.4012
+    ##     80 47682271.1350             nan     0.1000 -29729.8612
+    ##    100 47094995.9816             nan     0.1000 30322.1388
+    ##    120 46645413.0207             nan     0.1000 -38937.9055
+    ##    140 46194536.4062             nan     0.1000 -31296.8767
+    ##    160 45648341.8073             nan     0.1000 -50998.8434
+    ##    180 45134793.4670             nan     0.1000 -53780.2280
+    ##    200 44731489.8517             nan     0.1000 -75826.4517
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 51323137.0622             nan     0.1000 16479.7954
+    ##      2 51073942.2697             nan     0.1000 81290.1804
+    ##      3 50616256.2228             nan     0.1000 -37486.4473
+    ##      4 50145249.1499             nan     0.1000 -62332.6601
+    ##      5 49996720.5017             nan     0.1000 74781.2065
+    ##      6 49593053.4381             nan     0.1000 -116100.5354
+    ##      7 49460275.6400             nan     0.1000 62168.5337
+    ##      8 49271674.8943             nan     0.1000 14523.6033
+    ##      9 48989028.9532             nan     0.1000 -141058.8516
+    ##     10 48758008.1166             nan     0.1000 -34938.7818
+    ##     20 45815268.2757             nan     0.1000 9971.9385
+    ##     40 42919137.5326             nan     0.1000 -80545.4890
+    ##     60 40285701.0892             nan     0.1000 -13550.1282
+    ##     80 38381493.1679             nan     0.1000 -74179.2904
+    ##    100 36840384.8432             nan     0.1000 -142153.3698
+    ##    120 35774571.9801             nan     0.1000 -82691.4316
+    ##    140 34677249.3898             nan     0.1000 -63888.2184
+    ##    160 33820370.0256             nan     0.1000 -29500.3962
+    ##    180 33261794.7786             nan     0.1000 -48974.0384
+    ##    200 32504556.6285             nan     0.1000 -129986.3926
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 51415359.0122             nan     0.1000 113057.6381
+    ##      2 50738135.1839             nan     0.1000 115537.0981
+    ##      3 50441138.1836             nan     0.1000 43652.7100
+    ##      4 49877274.6912             nan     0.1000 1020.5601
+    ##      5 49389759.2502             nan     0.1000 -18210.4599
+    ##      6 49093478.0791             nan     0.1000 -63959.0639
+    ##      7 48601768.0245             nan     0.1000 -104385.9974
+    ##      8 48360265.0913             nan     0.1000 31731.7728
+    ##      9 48145911.2359             nan     0.1000 -26053.7345
+    ##     10 47893595.8318             nan     0.1000 92287.4268
+    ##     20 45206575.4801             nan     0.1000 -24060.6488
+    ##     40 41733819.5694             nan     0.1000 -53653.1360
+    ##     60 39009109.9274             nan     0.1000 -9923.0540
+    ##     80 36758720.7873             nan     0.1000 2736.7422
+    ##    100 35180399.9374             nan     0.1000 -35845.0687
+    ##    120 33194564.0156             nan     0.1000 -140430.0695
+    ##    140 32047859.1224             nan     0.1000 3455.1879
+    ##    160 30541055.4073             nan     0.1000 -7155.5736
+    ##    180 29198016.5404             nan     0.1000 -42261.1408
+    ##    200 28181393.5251             nan     0.1000 -63863.1454
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 51818163.0303             nan     0.1000 51866.2525
+    ##      2 51597076.9022             nan     0.1000 25927.2948
+    ##      3 50732668.8251             nan     0.1000 -91596.8717
+    ##      4 50134305.8604             nan     0.1000 -67701.6649
+    ##      5 49909908.4981             nan     0.1000 80839.3811
+    ##      6 49215184.8013             nan     0.1000 -51742.5882
+    ##      7 48912758.4457             nan     0.1000 216392.9242
+    ##      8 48298896.1749             nan     0.1000 10986.5727
+    ##      9 47712953.4778             nan     0.1000 -201464.5529
+    ##     10 47532510.0659             nan     0.1000 -39479.9874
+    ##     20 44765710.3706             nan     0.1000 -31475.0958
+    ##     40 40510171.0892             nan     0.1000 -11286.7579
+    ##     60 36504352.4225             nan     0.1000 -178419.1704
+    ##     80 33291841.1133             nan     0.1000 -6323.2713
+    ##    100 31027583.5091             nan     0.1000 -569.4367
+    ##    120 29522190.3221             nan     0.1000 -81145.8023
+    ##    140 28222767.2272             nan     0.1000 -42460.9034
+    ##    160 26707896.1045             nan     0.1000 -125315.0902
+    ##    180 25393555.1032             nan     0.1000 -10270.8329
+    ##    200 24246224.7196             nan     0.1000 -104435.2429
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 36947008.9529             nan     0.1000 61811.0040
+    ##      2 36869966.4752             nan     0.1000 9931.2868
+    ##      3 36802091.5650             nan     0.1000 46369.5549
+    ##      4 36660937.9632             nan     0.1000 6458.9656
+    ##      5 36471711.6765             nan     0.1000 85126.8321
+    ##      6 36397065.7265             nan     0.1000 88778.8926
+    ##      7 36277534.8445             nan     0.1000 -40076.2124
+    ##      8 36201556.4365             nan     0.1000 84056.4166
+    ##      9 36034696.6447             nan     0.1000 56214.4035
+    ##     10 35954679.8132             nan     0.1000 -77072.3674
+    ##     20 35430696.7453             nan     0.1000 -32879.1060
+    ##     40 34660181.5941             nan     0.1000 -5215.9646
+    ##     60 33762190.6868             nan     0.1000 -208386.1916
+    ##     80 33055392.5052             nan     0.1000 -65169.5652
+    ##    100 32428584.7586             nan     0.1000 -166782.9956
+    ##    120 31911152.3847             nan     0.1000 -93007.6839
+    ##    140 31245632.2538             nan     0.1000 -83208.3919
+    ##    160 30505130.8463             nan     0.1000 -66124.0677
+    ##    180 29997317.5359             nan     0.1000 38641.6266
+    ##    200 29594992.5026             nan     0.1000 -13320.7442
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 36816555.8554             nan     0.1000 36428.1993
+    ##      2 36614744.4571             nan     0.1000 84970.9512
+    ##      3 36467618.2099             nan     0.1000 114289.9219
+    ##      4 35853215.5468             nan     0.1000 89573.1844
+    ##      5 35741588.8577             nan     0.1000 35706.7851
+    ##      6 35662878.1689             nan     0.1000 -19073.6197
+    ##      7 35502110.4527             nan     0.1000 31289.6002
+    ##      8 35358725.2461             nan     0.1000 40586.1324
+    ##      9 35266119.1976             nan     0.1000 -16347.2054
+    ##     10 35238417.4705             nan     0.1000 -21127.9148
+    ##     20 33490008.8520             nan     0.1000 -84594.4481
+    ##     40 30909702.6262             nan     0.1000 -67439.0070
+    ##     60 28487054.4148             nan     0.1000 -62216.0516
+    ##     80 27077251.4254             nan     0.1000 60340.9006
+    ##    100 25787940.9323             nan     0.1000 -49400.5614
+    ##    120 24422560.8325             nan     0.1000 9227.2618
+    ##    140 23174580.2743             nan     0.1000 11442.6243
+    ##    160 22270399.4478             nan     0.1000 -153533.5801
+    ##    180 21503779.1207             nan     0.1000 -26470.9020
+    ##    200 20797688.2964             nan     0.1000 -35403.2199
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 36855354.8272             nan     0.1000 56023.3169
+    ##      2 36685629.8018             nan     0.1000 49676.7773
+    ##      3 36540599.7415             nan     0.1000 75801.8125
+    ##      4 36462603.5501             nan     0.1000 -5515.3616
+    ##      5 36341632.5512             nan     0.1000 14815.9129
+    ##      6 36207554.2779             nan     0.1000 40626.0983
+    ##      7 35977378.5438             nan     0.1000 -35823.8964
+    ##      8 35843156.6655             nan     0.1000 37092.1896
+    ##      9 35679723.1921             nan     0.1000 -31723.7553
+    ##     10 35165523.4721             nan     0.1000 87329.4872
+    ##     20 33525460.7491             nan     0.1000 24582.3321
+    ##     40 31357637.7714             nan     0.1000 -95754.3291
+    ##     60 28590175.5018             nan     0.1000 18156.0001
+    ##     80 26978351.0946             nan     0.1000 -149047.2710
+    ##    100 24846016.1031             nan     0.1000 -88702.0350
+    ##    120 23014958.8055             nan     0.1000 -151055.1227
+    ##    140 21695165.5294             nan     0.1000 3720.9535
+    ##    160 20543504.1325             nan     0.1000 -119546.4429
+    ##    180 19643563.0155             nan     0.1000 -44507.2183
+    ##    200 18812955.3819             nan     0.1000 -8698.0088
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 36820093.6110             nan     0.1000 147407.8300
+    ##      2 35989084.7921             nan     0.1000 123799.1749
+    ##      3 35595961.7424             nan     0.1000 -32712.5822
+    ##      4 35495064.7513             nan     0.1000 37463.1722
+    ##      5 34898960.1115             nan     0.1000 60464.6160
+    ##      6 34366170.9845             nan     0.1000 -154785.4744
+    ##      7 34278202.2518             nan     0.1000 36097.5172
+    ##      8 33822712.4661             nan     0.1000 -51552.0709
+    ##      9 33387561.9477             nan     0.1000 -324853.3985
+    ##     10 33249426.1990             nan     0.1000 25217.1050
+    ##     20 31693459.3323             nan     0.1000 -152646.1216
+    ##     40 28808165.7714             nan     0.1000 -45564.5768
+    ##     60 26180694.9046             nan     0.1000 -99582.0393
+    ##     80 24367167.3955             nan     0.1000 10290.2068
+    ##    100 22396134.0548             nan     0.1000 -163637.3698
+    ##    120 20868388.2452             nan     0.1000 -36954.0090
+    ##    140 19284771.2065             nan     0.1000 -14459.9236
+    ##    160 18116291.0339             nan     0.1000 -66945.4186
+    ##    180 17082945.7981             nan     0.1000 -34401.0970
+    ##    200 16428820.0295             nan     0.1000 -8775.5174
+    ## 
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 43564849.5571             nan     0.1000 9520.5888
+    ##      2 43393306.4875             nan     0.1000 20774.2917
+    ##      3 43299196.3257             nan     0.1000 92965.8976
+    ##      4 43163938.7714             nan     0.1000 -11457.4975
+    ##      5 43084058.7498             nan     0.1000 37719.4699
+    ##      6 42956517.7153             nan     0.1000  213.8466
+    ##      7 42866132.4986             nan     0.1000 -41524.1491
+    ##      8 42775060.6122             nan     0.1000 12071.1598
+    ##      9 42700871.9766             nan     0.1000 -50232.6871
+    ##     10 42611148.9397             nan     0.1000 -3718.1881
+    ##     20 42088355.1626             nan     0.1000 6272.5115
+    ##     40 41418892.0378             nan     0.1000 6992.4678
+    ##     60 40889262.7359             nan     0.1000 40631.7810
+    ##     75 40500245.2754             nan     0.1000 55263.7366
+
+``` r
+wtFit
+```
+
+    ## Stochastic Gradient Boosting 
+    ## 
+    ## 5900 samples
+    ##   53 predictor
+    ## 
+    ## Pre-processing:
+    ##  centered (53), scaled (53) 
+    ## Resampling: Cross-Validated (5 fold) 
+    ## Summary of sample sizes: 4720, 4721, 4720, 4719, 4720 
+    ## Resampling results across tuning parameters:
+    ## 
+    ##   interaction.depth  n.trees
+    ##   1                   25    
+    ##   1                   50    
+    ##   1                   75    
+    ##   1                  100    
+    ##   1                  125    
+    ##   1                  150    
+    ##   1                  175    
+    ##   1                  200    
+    ##   2                   25    
+    ##   2                   50    
+    ##   2                   75    
+    ##   2                  100    
+    ##   2                  125    
+    ##   2                  150    
+    ##   2                  175    
+    ##   2                  200    
+    ##   3                   25    
+    ##   3                   50    
+    ##   3                   75    
+    ##   3                  100    
+    ##   3                  125    
+    ##   3                  150    
+    ##   3                  175    
+    ##   3                  200    
+    ##   4                   25    
+    ##   4                   50    
+    ##   4                   75    
+    ##   4                  100    
+    ##   4                  125    
+    ##   4                  150    
+    ##   4                  175    
+    ##   4                  200    
+    ##   RMSE      Rsquared  
+    ##   6004.788  0.01531058
+    ##   6025.393  0.01774463
+    ##   5999.578  0.02240505
+    ##   6002.997  0.02404910
+    ##   6008.535  0.02423892
+    ##   6021.922  0.02359794
+    ##   6023.811  0.02379314
+    ##   6028.176  0.02327317
+    ##   6026.404  0.01708098
+    ##   6085.781  0.01744801
+    ##   6101.042  0.01813199
+    ##   6142.999  0.01857463
+    ##   6163.131  0.01867983
+    ##   6165.773  0.02036632
+    ##   6172.419  0.01964205
+    ##   6180.394  0.01966794
+    ##   6038.138  0.01602644
+    ##   6081.296  0.01976207
+    ##   6124.927  0.02105449
+    ##   6133.826  0.02354316
+    ##   6180.500  0.02201114
+    ##   6215.802  0.02086062
+    ##   6248.363  0.01996914
+    ##   6280.281  0.02054582
+    ##   6036.785  0.02401938
+    ##   6089.200  0.02269479
+    ##   6114.716  0.02592751
+    ##   6159.058  0.02438653
+    ##   6157.253  0.02679678
+    ##   6164.012  0.02905396
+    ##   6173.106  0.02725081
+    ##   6213.627  0.02752012
+    ##   MAE     
+    ##   1971.980
+    ##   1974.256
+    ##   1956.569
+    ##   1947.547
+    ##   1955.822
+    ##   1960.546
+    ##   1968.121
+    ##   1958.801
+    ##   1970.548
+    ##   1981.894
+    ##   1985.363
+    ##   1993.887
+    ##   1996.555
+    ##   2002.527
+    ##   2009.366
+    ##   2010.979
+    ##   1963.067
+    ##   1966.224
+    ##   1989.114
+    ##   1998.705
+    ##   2022.306
+    ##   2039.251
+    ##   2067.920
+    ##   2082.095
+    ##   1968.924
+    ##   1974.771
+    ##   1985.900
+    ##   2025.960
+    ##   2027.231
+    ##   2047.584
+    ##   2064.852
+    ##   2091.244
+    ## 
+    ## Tuning parameter
+    ##  held constant at a value
+    ##  of 10
+    ## RMSE was used to select
+    ##  the optimal model using
+    ##  the smallest value.
+    ## The final values used for
+    ##  1, shrinkage = 0.1
+    ##  and n.minobsinnode = 10.
+
+#### Boosted Tree Test Results
+
+xxxx
+
+``` r
+#need to figure out why the error is occurring here
+#pred1 <- predict(wtFit, newdata = worldTest)
+#confusionMatrix(pred1, worldTest$shares)
+```
 
 # Comparison
 
