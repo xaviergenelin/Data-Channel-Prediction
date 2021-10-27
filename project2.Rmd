@@ -94,7 +94,7 @@ newsTest <- news[-trainIndex, ]
 I was hoping to see the correlation plot for the variables to see what was most related to shares. Kind of rough with the large number of variables
 
 ```{r}
-corrs <- cor(newsTrain)
+corrs <- cor(worldTrain)
 
 corrplot(corrs, tl.cex = 0.5)
 ```
@@ -107,10 +107,7 @@ corrplot(corrs, tl.cex = 0.5)
 ### Graph 1
 
 ```{r}
-# still working on this...need to play around with the data a bit more.
-p <- ggplot(worldTrain, aes(x=shares)) + 
-  geom_boxplot() + coord_flip()
-p
+ggplot(data = newsTrain, aes(x = newsTrain$num_keywords, y = newsTrain$num_imgs)) + geom_point(aes(color = newsTrain$shares), position = "jitter") + labs(x = "Keywords", y = "Number of Images", title="Images to Keywords ")
 ```
 
 
@@ -132,24 +129,44 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
   geom_point(aes(color = weekday)) +
   labs(title = "Shares vs Number of Images", x = "Number of Images", y = "Shares")
 ```
+### Graph 4
+
+```{r}
+ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + geom_point(aes(color = rate_positive_words), position = "jitter") + geom_smooth(formula = y ~ x, method = "loess") + labs(x = "Global Subjectivity", y = "Rate Positive Words", title="Correlation of Global Subjectivity to Rate of Positive Words")
+```
+
+
+### Graph 5
+
+```{r}
+ggplot(newsTrain, aes(x=timedelta)) + 
+  geom_line(aes(y=shares))+ labs(title="Shares across timedelta",
+       y="Shares")
+```
+
+### Graph 6
+
+```{r}
+
+```
 
 
 ## Contingency Tables
 
 ### 2-way Contingency Table
 
-Shows token count in titles on Mondays 
+Showing counts of keywords that appear on the weekend vs. not on the weekend.
 
 ```{r, eval=TRUE, echo=TRUE}
-table(newsTrain$n_tokens_title, newsTrain$weekday_is_monday)
+table(newsTrain$num_keywords, newsTrain$is_weekend)
 ```
 
 ### 3-Way Contingency Table
 
-xxx
+I need to figure out what a kw_min_min means, but it works for the three way table given the fixed number of categories.
 
 ```{r, eval=TRUE, echo=TRUE}
-
+table(newsTrain$num_keywords, newsTrain$is_weekend, newsTrain$kw_min_min)
 ```
 
 
@@ -188,7 +205,7 @@ worldtrainglmfit <- lm(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg,
 
 pred1 <- predict(worldtrainglmfit, newdata = newsTest)
 
-postResample(pred1, obs = newsTest$shares)
+postResample(pred1, obs = newsTest$shares)[2]
 ```
 
 ```{r}
@@ -220,7 +237,7 @@ This is the boosted tree model using all predictors in the `newsTrain` data set.
 
 ```{r}
 set.seed(30)
-wtFit <- train(shares ~ ., data = newsTrain,
+wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain,
                method = "gbm",
                preProcess = c("center", "scale"),
                trControl = trainControl(method = "cv",
@@ -231,7 +248,7 @@ wtFit
 
 #### Boosted Tree Test Results
 
-xxxx
+Still working on this,getting an error
 
 ```{r, eval = FALSE}
 
