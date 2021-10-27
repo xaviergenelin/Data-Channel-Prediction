@@ -38,6 +38,7 @@ library(car)
 library(class)
 library(gbm)
 library(randomForest)
+library(doParallel)
 ```
 
 # Introduction
