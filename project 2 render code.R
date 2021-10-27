@@ -18,7 +18,7 @@ for(channel in channelList){
 }
 
   
-### render code for the main project
+# ## render code for the main project
 # rmarkdown::render(
 #   "project2.Rmd",
 #   output_format = "github_document" (html_preview = FALSE),

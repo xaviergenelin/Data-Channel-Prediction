@@ -1,27 +1,30 @@
 ---
-title: "Project 2"
+title: "`r params$channel` Analysis"
 author: "Group 6, Xavier Genelin, Dave Bergeron"
-date: "10/19/2021"
+date: "10/27/2021"
 output: 
   github_document:
     html_preview: FALSE
     toc: TRUE
-#params:
-  #channel: channel
+params:
+  channel: channel
 ---
 
 I don't think we need all of these libraries. We can keep them for now but the project doesn't require anything with SQL so those can be removed later.
 
 Dave:  Agree, one of my bad habits not pruning the list from one assignment to the other.
 
+Xavier: I've added a comment to each of them that I've used
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-library(tidyverse)
+imagePath <- paste0("../Reports/", params$channel, "_files/figure-gfm")
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.path = imagePath)
+library(tidyverse) # used
 library(knitr)
 library(rmarkdown)
 library(haven)
 library(readxl)
-library(parallel)
+library(parallel) # used
 library(purrr)
 library(lattice)
 library(caret)
@@ -30,7 +33,7 @@ library(plot3D)
 library(MuMIn)
 library(devtools)
 library(pls)
-library(corrplot)
+library(corrplot) # used
 library(car)
 library(class)
 library(gbm)
@@ -39,7 +42,7 @@ library(randomForest)
 
 # Introduction
 
-We'll load in the (Online News Popularity Data Set)[https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity]  from the UCI Machine Learning Repository. From this data, we'll break it down into 6 different groups based on the data channel: lifestyle, entertainment, bus, socmed, tech, and world. 
+For this project, we'll be analyzing the(Online News Popularity Data Set)[https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity] from the UCI Machine Learning Repository. For this analysis, we'll be examining the `r params$channel` data channel. Our analysis for this channel will go into an exploratory data analysis with different graphs and numerical summaries, as well as trying to predict the number of shares with different types of models. 
 
 Libraries that are being used:  
 
@@ -48,14 +51,17 @@ Libraries that are being used:
 
 
 # Load Data w/Automation
+
+Before doing our analysis, we need to load in the data and do some data manipulation. Since we are only looking at the `r params$channel` data channel, we'll filter the dataset on this channel and create a new variable for the weekday from the columns `weekday_is_*`. After filtering and creating the weekday variable, we'll remove the columns that went into creating those and the url column since these won't help further in our analysis. From the filtered data set we made a training and test set with a 70:30 split to help with our modeling later. 
+
 ```{r}
 # load in the data
 news <- read_csv("OnlineNewsPopularity.csv")
 
 #### this will be part of the overall parameters but we can change this as we go forward for different datasets
-channel <- "world"
+#channel <- "world"
 
-# create a new column for the data channel
+# create a new column for the data channel and weekday
 news <- news %>% 
  mutate(data_channel = 
           if_else(data_channel_is_lifestyle == 1, "lifestyle", 
@@ -72,11 +78,11 @@ news <- news %>%
                                                           if_else(weekday_is_saturday == 1, "Saturday", "Sunday"))))))
         )
 
+news$weekday <- factor(news$weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+
 # Filter the news data set on the channel of interest
 # remove the url and data_channel_is_* and weekday_is_* columns
 news <- news %>% filter(data_channel == channel) %>% select(!c(url, starts_with("data_channel"), starts_with("weekday_is")))
-
-news$weekday <- factor(news$weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
 
 # set seed for reproducibility
 set.seed(55)
@@ -93,61 +99,68 @@ newsTest <- news[-trainIndex, ]
 
 I was hoping to see the correlation plot for the variables to see what was most related to shares. Kind of rough with the large number of variables
 
-```{r}
-corrs <- cor(worldTrain)
+## Graph 1
 
-corrplot(corrs, tl.cex = 0.5)
+```{r}
+ggplot(data = newsTrain, aes(x = newsTrain$num_keywords, y = newsTrain$num_imgs)) + 
+  geom_point(aes(color = newsTrain$shares), position = "jitter") + 
+  labs(x = "Keywords", y = "Number of Images", title="Images to Keywords", colour = "Shares")
 ```
 
 
-# EDA items
+## Graph 2
 
-## Graphs
-
-### Graph 1
+The plot below shows boxplots of the shares by weekday. The box itself shows the middle 50$\%$ of the data for that weekday and any outliers are shown as points outside of the box. The bottom end of the box shows the number of shares that are at 25$\%$ for that weekday, the top end shows the 75th percentile of the data, and the line in the box shows the median. This can help us tell if the data is skewed one way or another based on where the line is within the box. We also added data points in blue that show the average value based on the weekday as well to compare it with the boxplot.  
 
 ```{r}
-ggplot(data = newsTrain, aes(x = newsTrain$num_keywords, y = newsTrain$num_imgs)) + geom_point(aes(color = newsTrain$shares), position = "jitter") + labs(x = "Keywords", y = "Number of Images", title="Images to Keywords ")
+# get the average shares by weekday
+avgValues <- newsTrain %>% group_by(weekday) %>% summarise(avg = mean(shares)) 
+
+ggplot(newsTrain, aes(x = weekday, y = shares)) +
+  geom_boxplot(fill = "grey") + 
+  coord_cartesian(ylim = c(0,10000)) +
+  geom_point(avgValues, mapping = aes(x = weekday, y = avg), color = "navy") + 
+  geom_line(avgValues, mapping = aes(x = weekday, y = avg, group = 1), color = "navy") +
+  labs(title = "Shares by Weekday", subtitle = "Means shown in navy blue", x = "Weekday", y = "Shares")
 ```
 
+## Graph 3
 
-### Graph 2
-```{r}
-# xavier. Not the best but I'll try and make it be a little more detailed
-ggplot(data = newsTrain, aes(x = ordered(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")), y = shares)) + 
-  geom_col() + 
-  labs(title = "Shares per Day", x = "Day", y = "Shares")
-```
-
-
-
-### Graph 3
+The next graph shows the number of images and the number of shares that we have in the data set, along with the different days in different colors. This can give us some insight in a more detailed level if there is any relationship with shares and images as a whole, or even if it depends on the day. If there is a positive relationship between the two, we'd expect to see that as images increase so does shares. If there's a negative relationship, as shares increase the number of images would go down or vice versa.  
 
 ```{r}
-# xavier
 ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
   geom_point(aes(color = weekday)) +
-  labs(title = "Shares vs Number of Images", x = "Number of Images", y = "Shares")
+  labs(title = "Shares vs Number of Images by Weekday", x = "Number of Images", y = "Shares")
 ```
-### Graph 4
+## Graph 4
 
 ```{r}
-ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + geom_point(aes(color = rate_positive_words), position = "jitter") + geom_smooth(formula = y ~ x, method = "loess") + labs(x = "Global Subjectivity", y = "Rate Positive Words", title="Correlation of Global Subjectivity to Rate of Positive Words")
+ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
+  geom_point(aes(color = rate_positive_words), position = "jitter") + 
+  geom_smooth(formula = y ~ x, method = "loess") + 
+  labs(x = "Global Subjectivity", y = "Rate Positive Words", 
+       title="Correlation of Global Subjectivity to Rate of Positive Words", colour = "Rate Positive Words")
 ```
 
 
-### Graph 5
+## Graph 5
 
 ```{r}
 ggplot(newsTrain, aes(x=timedelta)) + 
-  geom_line(aes(y=shares))+ labs(title="Shares across timedelta",
-       y="Shares")
+  geom_line(aes(y=shares)) + 
+  labs(title="Shares across timedelta", y="Shares")
 ```
 
-### Graph 6
+## Graph 6
+
+The last graph we'll examine is a correlation plot between all the variables. The correlation will tell us how strong the relationship between two variables is, and whether that relationship is positive or negative. The color index will show the degree of the relationship between the two. The darker the color is, the stronger the relationship between those two variables. Our main variable of interest is `shares` so we're hoping to see some variables having a strong relationship in either direction with that.
 
 ```{r}
+# remove the weekday column since this isn't numeric after mutating it
+corrs <- cor(newsTrain %>% select(!weekday))
 
+corrplot(corrs, method =  "color", tl.cex = 0.5, type = "upper")
 ```
 
 
@@ -171,32 +184,21 @@ table(newsTrain$num_keywords, newsTrain$is_weekend, newsTrain$kw_min_min)
 
 
 ## Numerical Summary
-```{r}
-newsTrain %>% group_by(weekday) %>% summarise(Min = min(shares), Mean = mean(shares), Max = max(shares), SD = sd(shares))
-```
 
+Earlier we saw the boxplots show the number of shares based on weekdays, but with the large values it could be difficult to see where specific points lie on the graph, like the minimum value. We may not even have seen the maximum value for some of them due to large outliers. The table below will give the numeric summary of what we saw within the boxplots to help give some values to what we saw visually earlier. 
+
+```{r}
+# Shares by weekday
+newsTrain %>% 
+  group_by(weekday) %>% 
+  summarise(Min = min(shares), Q1 = quantile(shares, 0.25), Mean = mean(shares), 
+            Median = median(shares), Q3 = quantile(shares, 0.75), Max = max(shares), SD = sd(shares))
+```
 
 
 # Modeling
 
 In this section we're going to compare the following models: random forest, linear regression, and two ensemble models (we can fill this in when we decide which two to do). Each of the models will be trying to predict the amount of shares for each of the data channels. 
-
-
-
-## Random Forest
-
-Tried to use all the variables, took forever to run. Initially had 10 cv and 1:15 trees. Made the cv to 5 and tried smaller mtry values but it still takes a long time. 
-
-```{r}
-set.seed(55)
-now <- Sys.time()
-# takes forever to run
-rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_00 + LDA_01 + LDA_02 + LDA_03 + LDA_04, data = newsTrain, method = "rf", preProcess = c("center", "scale"), trControl = trainControl(method = "cv", number = 5), tuneGrid = expand.grid(mtry = 1:8))
-
-rfFit$results
-# took 14 minutes
-Sys.time() - now
-```
 
 ## Linear Regression
 ```{r}
@@ -209,27 +211,34 @@ postResample(pred1, obs = newsTest$shares)[2]
 ```
 
 ```{r}
-# Xavier model
-olsFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, method = "lm", preProcess = c("center", "scale"), trControl = trainControl(method = "cv", number = 10))
+mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, method = "lm", preProcess = c("center", "scale"), trControl = trainControl(method = "cv", number = 10))
 
-olsPred <- predict(olsFit, newsTest)
+mlrPred <- predict(mlrFit, newsTest)
 
-postResample(olsPred, obs = newsTest$shares)[2]
-
+mlrResults <- postResample(mlrPred, obs = newsTest$shares)
 ```
-
-```{r}
-# poisson model
-poissonFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, method = "glm", family = "poisson", preProcess = c("center", "scale"), trControl = trainControl(method = "cv", number = 10))
-
-poissonPred <- predict(poissonFit, newsTest)
-
-postResample(poissonPred, obs = newsTest$shares)[2]
-```
-
-Not much of a difference between the linear model and poisson
 
 ## Ensemble 
+
+### Random Forest
+
+
+```{r}
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_00 + LDA_01 + LDA_02 + LDA_03 + LDA_04, 
+               data = newsTrain, method = "rf", 
+               preProcess = c("center", "scale"), 
+               trControl = trainControl(method = "cv", number = 5), 
+               tuneGrid = expand.grid(mtry = 1:7))
+
+rfPred <- predict(rfFit, newsTest)
+
+rfResults <- postResample(rfPred, obs = newsTest$shares)
+
+stopCluster(cl)
+```
 
 ### Boosted Tree
 
@@ -253,16 +262,16 @@ Still working on this,getting an error
 ```{r, eval = FALSE}
 
 ```
+
 # Comparison
 
-
-## Test for project 2
-
-Test
-
-```{r, echo=TRUE, eval=FALSE}
-library(lares)
-corr_var(news, shares)
+```{r}
+# started the comparison with a table
+data.frame(mlrResults, rfResults)
 ```
+
+
+
+
 
 
