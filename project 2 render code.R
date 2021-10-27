@@ -9,7 +9,6 @@ for(channel in channelList){
     "project2.Rmd",
     output_file = paste0("Reports/", channel),
     output_format = "github_document" (html_preview = FALSE),
-    encoding = "UTF-8",
     params = list(
       channel = tolower(channel)
     )

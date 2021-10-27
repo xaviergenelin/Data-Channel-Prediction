@@ -38,7 +38,7 @@ library(car)
 library(class)
 library(gbm)
 library(randomForest)
-#library(doParallel) # used
+library(doParallel) # used
 ```
 
 # Introduction
@@ -62,7 +62,7 @@ Before doing our analysis, we need to load in the data and do some data manipula
 news <- read_csv("OnlineNewsPopularity.csv")
 
 #### this will be part of the overall parameters but we can change this as we go forward for different datasets
-#channel <- "world"
+channel <- "world"
 
 # create a new column for the data channel and weekday
 news <- news %>% 
@@ -214,7 +214,7 @@ postResample(pred1, obs = newsTest$shares)[2]
 ```
 
 ```{r}
-mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, method = "lm", preProcess = c("center", "scale"), trControl = trainControl(method = "cv", number = 10))
+mlrFit <- lm(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
 
 mlrPred <- predict(mlrFit, newsTest)
 
