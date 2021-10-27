@@ -136,7 +136,7 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
   geom_point(aes(color = weekday)) +
   labs(title = "Shares vs Number of Images by Weekday", x = "Number of Images", y = "Shares")
 ```
-## Graph 4
+## Graph 4 - Test
 
 ```{r}
 ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
