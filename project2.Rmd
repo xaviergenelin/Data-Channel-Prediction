@@ -67,12 +67,12 @@ channel <- params$channel
 # create a new column for the data channel and weekday
 news <- news %>% 
  mutate(data_channel = 
-          if_else(data_channel_is_lifestyle == 1, "lifestyle", 
-                  if_else(data_channel_is_entertainment == 1, "entertainment", 
-                          if_else(data_channel_is_bus == 1, "bus", 
-                                  if_else(data_channel_is_socmed == 1, "socmed", 
-                                          if_else(data_channel_is_tech == 1, "tech", 
-                                                  if_else(data_channel_is_world == 1, "world", "other")))))),
+          if_else(data_channel_is_lifestyle == 1, "Lifestyle", 
+                  if_else(data_channel_is_entertainment == 1, "Entertainment", 
+                          if_else(data_channel_is_bus == 1, "Bus", 
+                                  if_else(data_channel_is_socmed == 1, "Socmed", 
+                                          if_else(data_channel_is_tech == 1, "Tech", 
+                                                  if_else(data_channel_is_world == 1, "World", "other")))))),
         weekday = if_else(weekday_is_monday == 1, "Monday", 
                           if_else(weekday_is_tuesday == 1, "Tuesday",
                                   if_else(weekday_is_wednesday == 1, "Wednesday",
@@ -204,20 +204,22 @@ newsTrain %>%
 In this section we're going to compare the following models: random forest, linear regression, and two ensemble models (we can fill this in when we decide which two to do). Each of the models will be trying to predict the amount of shares for each of the data channels. 
 
 ## Linear Regression
+
+
 ```{r lm1}
 #Model 1 -  Selecting predictors based on relevancy from ANOVA results after running the summary from model using all predictors in another model - 4 predictors
 worldtrainglmfit <- lm(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
 
 pred1 <- predict(worldtrainglmfit, newdata = newsTest)
 
-postResample(pred1, obs = newsTest$shares)[2]
+lm1Results <- postResample(pred1, obs = newsTest$shares)
 ```
 
 ```{r lm2}
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
-mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, method = "lm", trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
 
 mlrPred <- predict(mlrFit, newsTest)
 
@@ -273,7 +275,7 @@ Still working on this,getting an error
 
 ```{r comparison}
 # started the comparison with a table
-data.frame(mlrResults, rfResults)
+data.frame(lm1Results, mlrResults, rfResults)
 ```
 
 
