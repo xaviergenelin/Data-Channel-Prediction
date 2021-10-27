@@ -62,7 +62,7 @@ Before doing our analysis, we need to load in the data and do some data manipula
 news <- read_csv("OnlineNewsPopularity.csv")
 
 #### this will be part of the overall parameters but we can change this as we go forward for different datasets
-channel <- "world"
+#channel <- "world"
 
 # create a new column for the data channel and weekday
 news <- news %>% 
@@ -214,7 +214,7 @@ postResample(pred1, obs = newsTest$shares)[2]
 ```
 
 ```{r lm2}
-mlrFit <- lm(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
 
 mlrPred <- predict(mlrFit, newsTest)
 
@@ -230,7 +230,7 @@ mlrResults <- postResample(mlrPred, obs = newsTest$shares)
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
-rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_00 + LDA_01 + LDA_02 + LDA_03 + LDA_04, 
+rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
                data = newsTrain, method = "rf", 
                preProcess = c("center", "scale"), 
                trControl = trainControl(method = "cv", number = 5), 
@@ -239,7 +239,7 @@ rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_00 + LDA_01 + LDA_02 + LDA_0
 rfPred <- predict(rfFit, newsTest)
 
 rfResults <- postResample(rfPred, obs = newsTest$shares)
-
+#rfFit$bestTune best mtry value
 stopCluster(cl)
 ```
 
@@ -248,16 +248,16 @@ stopCluster(cl)
 This is the boosted tree model using all predictors in the `newsTrain` data set.
 
 ```{r bootTree}
-set.seed(30)
-wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
-               data = newsTrain, method = "gbm", 
-               preProcess = c("center", "scale"), 
-               trControl = trainControl(method = "cv",number = 5), 
-               tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25), 
-                                      .interaction.depth = seq(1, 4, by = 1), 
-                                      .shrinkage = (0.1), 
-                                      .n.minobsinnode = (10)))
-wtFit
+# set.seed(30)
+# wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
+#                data = newsTrain, method = "gbm", 
+#                preProcess = c("center", "scale"), 
+#                trControl = trainControl(method = "cv",number = 5), 
+#                tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25), 
+#                                       .interaction.depth = seq(1, 4, by = 1), 
+#                                       .shrinkage = (0.1), 
+#                                       .n.minobsinnode = (10)))
+# wtFit
 ```
 
 #### Boosted Tree Test Results
