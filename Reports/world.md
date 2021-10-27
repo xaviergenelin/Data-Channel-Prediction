@@ -1,4 +1,4 @@
-world Analysis
+World Analysis
 ================
 Group 6, Xavier Genelin, Dave Bergeron
 10/27/2021
@@ -17,7 +17,7 @@ Xavier: I’ve added a comment to each of them that I’ve used
 For this project, we’ll be analyzing the(Online News Popularity Data
 Set)\[<https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity>\]
 from the UCI Machine Learning Repository. For this analysis, we’ll be
-examining the world data channel. Our analysis for this channel will go
+examining the World data channel. Our analysis for this channel will go
 into an exploratory data analysis with different graphs and numerical
 summaries, as well as trying to predict the number of shares with
 different types of models.
@@ -32,7 +32,7 @@ Libraries that are being used:
 # Load Data w/Automation
 
 Before doing our analysis, we need to load in the data and do some data
-manipulation. Since we are only looking at the world data channel, we’ll
+manipulation. Since we are only looking at the World data channel, we’ll
 filter the dataset on this channel and create a new variable for the
 weekday from the columns `weekday_is_*`. After filtering and creating
 the weekday variable, we’ll remove the columns that went into creating
@@ -50,12 +50,12 @@ channel <- params$channel
 # create a new column for the data channel and weekday
 news <- news %>% 
  mutate(data_channel = 
-          if_else(data_channel_is_lifestyle == 1, "lifestyle", 
-                  if_else(data_channel_is_entertainment == 1, "entertainment", 
-                          if_else(data_channel_is_bus == 1, "bus", 
-                                  if_else(data_channel_is_socmed == 1, "socmed", 
-                                          if_else(data_channel_is_tech == 1, "tech", 
-                                                  if_else(data_channel_is_world == 1, "world", "other")))))),
+          if_else(data_channel_is_lifestyle == 1, "Lifestyle", 
+                  if_else(data_channel_is_entertainment == 1, "Entertainment", 
+                          if_else(data_channel_is_bus == 1, "Bus", 
+                                  if_else(data_channel_is_socmed == 1, "Socmed", 
+                                          if_else(data_channel_is_tech == 1, "Tech", 
+                                                  if_else(data_channel_is_world == 1, "World", "other")))))),
         weekday = if_else(weekday_is_monday == 1, "Monday", 
                           if_else(weekday_is_tuesday == 1, "Tuesday",
                                   if_else(weekday_is_wednesday == 1, "Wednesday",
@@ -95,7 +95,7 @@ ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) +
   labs(x = "Keywords", y = "Number of Images", title="Images to Keywords", colour = "Shares")
 ```
 
-![](../Reports/world_files/figure-gfmgraph1-1.png)<!-- -->
+![](../Reports/World_files/figure-gfmgraph1-1.png)<!-- -->
 
 ## Graph 2
 
@@ -121,7 +121,7 @@ ggplot(newsTrain, aes(x = weekday, y = shares)) +
   labs(title = "Shares by Weekday", subtitle = "Means shown in navy blue", x = "Weekday", y = "Shares")
 ```
 
-![](../Reports/world_files/figure-gfmgraph2-1.png)<!-- -->
+![](../Reports/World_files/figure-gfmgraph2-1.png)<!-- -->
 
 ## Graph 3
 
@@ -140,7 +140,7 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
   labs(title = "Shares vs Number of Images by Weekday", x = "Number of Images", y = "Shares")
 ```
 
-![](../Reports/world_files/figure-gfmgraph3-1.png)<!-- --> ## Graph 4
+![](../Reports/World_files/figure-gfmgraph3-1.png)<!-- --> ## Graph 4
 
 ``` r
 ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
@@ -150,7 +150,7 @@ ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) 
        title="Correlation of Global Subjectivity to Rate of Positive Words", colour = "Rate Positive Words")
 ```
 
-![](../Reports/world_files/figure-gfmgraph4-1.png)<!-- -->
+![](../Reports/World_files/figure-gfmgraph4-1.png)<!-- -->
 
 ## Graph 5
 
@@ -160,7 +160,7 @@ ggplot(newsTrain, aes(x=timedelta)) +
   labs(title="Shares across timedelta", y="Shares")
 ```
 
-![](../Reports/world_files/figure-gfmgraph5-1.png)<!-- -->
+![](../Reports/World_files/figure-gfmgraph5-1.png)<!-- -->
 
 ## Graph 6
 
@@ -180,7 +180,7 @@ corrs <- cor(newsTrain %>% select(!weekday))
 corrplot(corrs, method =  "color", tl.cex = 0.5, type = "upper")
 ```
 
-![](../Reports/world_files/figure-gfmgraph6-1.png)<!-- -->
+![](../Reports/World_files/figure-gfmgraph6-1.png)<!-- -->
 
 ## Contingency Tables
 
@@ -341,17 +341,14 @@ worldtrainglmfit <- lm(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg,
 
 pred1 <- predict(worldtrainglmfit, newdata = newsTest)
 
-postResample(pred1, obs = newsTest$shares)[2]
+lm1Results <- postResample(pred1, obs = newsTest$shares)
 ```
-
-    ##   Rsquared 
-    ## 0.02334528
 
 ``` r
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
-mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, method = "lm", trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
 
 mlrPred <- predict(mlrFit, newsTest)
 
@@ -407,10 +404,10 @@ Still working on this,getting an error
 
 ``` r
 # started the comparison with a table
-data.frame(mlrResults, rfResults)
+data.frame(lm1Results, mlrResults, rfResults)
 ```
 
-    ##            mlrResults    rfResults
-    ## RMSE     4.717567e+03 4.652023e+03
-    ## Rsquared 2.421682e-02 2.605321e-02
-    ## MAE      1.922787e+03 1.863662e+03
+    ##            lm1Results   mlrResults    rfResults
+    ## RMSE     4.617892e+03 4.599819e+03 4677.4276319
+    ## Rsquared 2.334528e-02 3.088937e-02    0.0220365
+    ## MAE      1.844947e+03 1.835799e+03 1871.8115205
