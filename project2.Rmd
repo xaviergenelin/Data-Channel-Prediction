@@ -38,7 +38,7 @@ library(car)
 library(class)
 library(gbm)
 library(randomForest)
-library(doParallel)
+library(doParallel) # used
 ```
 
 # Introduction
@@ -49,6 +49,8 @@ Libraries that are being used:
 
 * `tidyverse`  
 * `caret`  
+* `corrplot`  
+* `doParellel`  
 
 
 # Load Data w/Automation
@@ -225,8 +227,8 @@ mlrResults <- postResample(mlrPred, obs = newsTest$shares)
 
 
 ```{r}
-#cl <- makePSOCKcluster(5)
-#registerDoParallel(cl)
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
 
 rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_00 + LDA_01 + LDA_02 + LDA_03 + LDA_04, 
                data = newsTrain, method = "rf", 
@@ -238,7 +240,7 @@ rfPred <- predict(rfFit, newsTest)
 
 rfResults <- postResample(rfPred, obs = newsTest$shares)
 
-#stopCluster(cl)
+stopCluster(cl)
 ```
 
 ### Boosted Tree
