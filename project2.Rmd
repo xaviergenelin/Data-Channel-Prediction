@@ -102,8 +102,8 @@ I was hoping to see the correlation plot for the variables to see what was most 
 ## Graph 1
 
 ```{r}
-ggplot(data = newsTrain, aes(x = newsTrain$num_keywords, y = newsTrain$num_imgs)) + 
-  geom_point(aes(color = newsTrain$shares), position = "jitter") + 
+ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) + 
+  geom_point(aes(color = shares), position = "jitter") + 
   labs(x = "Keywords", y = "Number of Images", title="Images to Keywords", colour = "Shares")
 ```
 
