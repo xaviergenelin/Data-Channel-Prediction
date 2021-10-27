@@ -45,7 +45,7 @@ split to help with our modeling later.
 news <- read_csv("OnlineNewsPopularity.csv")
 
 #### this will be part of the overall parameters but we can change this as we go forward for different datasets
-channel <- "world"
+channel <- params$channel
 
 # create a new column for the data channel and weekday
 news <- news %>% 
@@ -95,7 +95,7 @@ ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) +
   labs(x = "Keywords", y = "Number of Images", title="Images to Keywords", colour = "Shares")
 ```
 
-![](../Reports/world_files/figure-gfmunnamed-chunk-3-1.png)<!-- -->
+![](../Reports/world_files/figure-gfmgraph1-1.png)<!-- -->
 
 ## Graph 2
 
@@ -121,7 +121,7 @@ ggplot(newsTrain, aes(x = weekday, y = shares)) +
   labs(title = "Shares by Weekday", subtitle = "Means shown in navy blue", x = "Weekday", y = "Shares")
 ```
 
-![](../Reports/world_files/figure-gfmunnamed-chunk-4-1.png)<!-- -->
+![](../Reports/world_files/figure-gfmgraph2-1.png)<!-- -->
 
 ## Graph 3
 
@@ -140,8 +140,7 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
   labs(title = "Shares vs Number of Images by Weekday", x = "Number of Images", y = "Shares")
 ```
 
-![](../Reports/world_files/figure-gfmunnamed-chunk-5-1.png)<!-- --> \#\#
-Graph 4
+![](../Reports/world_files/figure-gfmgraph3-1.png)<!-- --> ## Graph 4
 
 ``` r
 ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
@@ -151,7 +150,7 @@ ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) 
        title="Correlation of Global Subjectivity to Rate of Positive Words", colour = "Rate Positive Words")
 ```
 
-![](../Reports/world_files/figure-gfmunnamed-chunk-6-1.png)<!-- -->
+![](../Reports/world_files/figure-gfmgraph4-1.png)<!-- -->
 
 ## Graph 5
 
@@ -161,7 +160,7 @@ ggplot(newsTrain, aes(x=timedelta)) +
   labs(title="Shares across timedelta", y="Shares")
 ```
 
-![](../Reports/world_files/figure-gfmunnamed-chunk-7-1.png)<!-- -->
+![](../Reports/world_files/figure-gfmgraph5-1.png)<!-- -->
 
 ## Graph 6
 
@@ -181,7 +180,7 @@ corrs <- cor(newsTrain %>% select(!weekday))
 corrplot(corrs, method =  "color", tl.cex = 0.5, type = "upper")
 ```
 
-![](../Reports/world_files/figure-gfmunnamed-chunk-8-1.png)<!-- -->
+![](../Reports/world_files/figure-gfmgraph6-1.png)<!-- -->
 
 ## Contingency Tables
 
@@ -208,8 +207,8 @@ table(newsTrain$num_keywords, newsTrain$is_weekend)
 
 ### 3-Way Contingency Table
 
-I need to figure out what a kw\_min\_min means, but it works for the
-three way table given the fixed number of categories.
+I need to figure out what a kw_min_min means, but it works for the three
+way table given the fixed number of categories.
 
 ``` r
 table(newsTrain$num_keywords, newsTrain$is_weekend, newsTrain$kw_min_min)
@@ -349,11 +348,16 @@ postResample(pred1, obs = newsTest$shares)[2]
     ## 0.02334528
 
 ``` r
-mlrFit <- lm(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
 
 mlrPred <- predict(mlrFit, newsTest)
 
 mlrResults <- postResample(mlrPred, obs = newsTest$shares)
+
+stopCluster(cl)
 ```
 
 ## Ensemble
@@ -364,7 +368,7 @@ mlrResults <- postResample(mlrPred, obs = newsTest$shares)
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
-rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_00 + LDA_01 + LDA_02 + LDA_03 + LDA_04, 
+rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
                data = newsTrain, method = "rf", 
                preProcess = c("center", "scale"), 
                trControl = trainControl(method = "cv", number = 5), 
@@ -373,7 +377,7 @@ rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_00 + LDA_01 + LDA_02 + LDA_0
 rfPred <- predict(rfFit, newsTest)
 
 rfResults <- postResample(rfPred, obs = newsTest$shares)
-
+#rfFit$bestTune best mtry value
 stopCluster(cl)
 ```
 
@@ -384,12 +388,14 @@ data set.
 
 ``` r
 # set.seed(30)
-# wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain,
-#                method = "gbm",
-#                preProcess = c("center", "scale"),
-#                trControl = trainControl(method = "cv",
-#                                         number = 5),
-#                tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25), .interaction.depth = seq(1, 4, by = 1), .shrinkage = (0.1), .n.minobsinnode = (10)))
+# wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
+#                data = newsTrain, method = "gbm", 
+#                preProcess = c("center", "scale"), 
+#                trControl = trainControl(method = "cv",number = 5), 
+#                tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25), 
+#                                       .interaction.depth = seq(1, 4, by = 1), 
+#                                       .shrinkage = (0.1), 
+#                                       .n.minobsinnode = (10)))
 # wtFit
 ```
 
@@ -405,6 +411,6 @@ data.frame(mlrResults, rfResults)
 ```
 
     ##            mlrResults    rfResults
-    ## RMSE     4.599819e+03 4667.6992431
-    ## Rsquared 3.088937e-02    0.0210994
-    ## MAE      1.835799e+03 1852.3232641
+    ## RMSE     4.717567e+03 4.652023e+03
+    ## Rsquared 2.421682e-02 2.605321e-02
+    ## MAE      1.922787e+03 1.863662e+03
