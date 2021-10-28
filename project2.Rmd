@@ -7,7 +7,7 @@ output:
     html_preview: FALSE
     toc: TRUE
 params:
-  channel: World
+  channel: channel
 ---
 
 
