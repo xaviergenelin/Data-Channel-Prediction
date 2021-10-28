@@ -16,7 +16,6 @@ imagePath <- paste0("../Reports/", params$channel, "_files/figure-gfm")
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse) # used
 library(rmarkdown) #used
-library(parallel) # used
 library(caret) #used
 library(corrplot) # used
 library(doParallel) # used
@@ -29,10 +28,10 @@ For this project, we'll be analyzing the [Online News Popularity Data Set](https
 Libraries that are being used:  
 
 * `tidyverse`  
+* `rmarkdown`  
 * `caret`  
 * `corrplot`  
 * `doParellel`  
-
 
 # Load Data w/Automation
 
@@ -102,6 +101,7 @@ The plot below shows boxplots of the shares by weekday. The box itself shows the
 # get the average shares by weekday
 avgValues <- newsTrain %>% group_by(weekday) %>% summarise(avg = mean(shares)) 
 
+# ylim added because it was impossible to see anything without it due to large outliers
 ggplot(newsTrain, aes(x = weekday, y = shares)) +
   geom_boxplot(fill = "grey") + 
   coord_cartesian(ylim = c(0,10000)) +
@@ -122,7 +122,7 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
 
 ## Graph 4
 
-This graph shows the relationship between the global subjectivity and rate of positive words.  Their is a positive correlation between the variables that increases at a decreasing rate then starts to decline, suggesting that the rate of positive words is highest when global subjectivity is .75.
+This graph shows the relationship between the global subjectivity and rate of positive words. There is a positive correlation between the variables that increases at a decreasing rate then starts to decline, suggesting that the rate of positive words is highest when global subjectivity is .75.
 
 ```{r graph4}
 ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
@@ -234,9 +234,13 @@ stopCluster(cl)
 This model is a random forest and one of the three tree based methods.  Random Forests use the same idea as bagging, where multiple trees are created from bootstrap samples then results are averaged.  The difference from bagging is not all predictors are used, rather a random subset of predictors for each bootstrap sample/tree fit is utilized.  This approach minimizes the impact in the event a strong predictor is utilized.  Instead, by randomly selecting a subset of predictors, a good predictor won't dominate the tree fit.
 
 ```{r randForest}
+# make cluster for parallel computing
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
+# random forest model with preprocessed data that is centered and scaled
+# use 5-fold cross validation
+# mtry from 1:7
 rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
                data = newsTrain, method = "rf", 
                preProcess = c("center", "scale"), 
@@ -246,9 +250,14 @@ rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_
 rfPred <- predict(rfFit, newsTest)
 
 rfResults <- postResample(rfPred, obs = newsTest$shares)
-#rfFit$bestTune best mtry value
+
 stopCluster(cl)
+
+rfFit$bestTune[[1]]
+
 ```
+
+The optimal mtry value for the random forest model is `r rfFit$bestTune[[1]]`.
 
 ### Boosted Tree
 
@@ -275,6 +284,8 @@ wtResults <- postResample(wtPred, obs = newsTest$shares)
 stopCluster(cb)
 ```
 
+The optimal tuning parameters for the boosted tree were `r wtFit$bestTune[[1]]` trees and an interaction depth of `r wtFit$bestTune[[2]]`, along with the default values for `shrinkage` and `n.minobsinnode`.
+
 # Comparison
 
 ```{r comparison}
@@ -289,5 +300,4 @@ knitr::kable(results)
 ```
 
 
-The best model out of the 4 that were tested was `r bestModel$model` with an RMSE of `r round(bestModel$RMSE, 2)`.
-
+The best model out of the 4 that were tested was `r bestModel$model` with an RMSE of `r bestModel$RMSE`.
