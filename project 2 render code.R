@@ -7,10 +7,10 @@ channelList <- list("Bus", "Lifestyle", "Entertainment", "Socmed", "Tech", "Worl
 for(channel in channelList){
   rmarkdown::render(
     "project2.Rmd",
-    output_file = paste0("Reports/", "World"),
+    output_file = paste0("Reports/", channel),
     output_format = "github_document" (html_preview = FALSE),
     params = list(
-      channel = "World"
+      channel = channel
     )
   )
 
