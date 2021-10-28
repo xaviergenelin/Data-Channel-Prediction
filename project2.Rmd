@@ -12,13 +12,12 @@ params:
 
 
 ```{r setup, include=FALSE}
-imagePath <- paste0("../Reports/", params$channel, "_files/figure-gfm")
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-library(tidyverse) # used
-library(rmarkdown) #used
-library(caret) #used
-library(corrplot) # used
-library(doParallel) # used
+library(tidyverse) 
+library(rmarkdown) 
+library(caret) 
+library(corrplot) 
+library(doParallel) 
 ```
 
 # Introduction
@@ -78,13 +77,13 @@ newsTrain <- news[trainIndex, ]
 newsTest <- news[-trainIndex, ]
 ```
 
-# Summarizations
+# Data Exploration
 
 In this section we'll be analyzing our training set both graphically and numerically. 
 
 ## Graph 1
 
-This plot shows the binning of the number of images associated with number of keywords.  Generally speaking the number of images remains low for each count of keywords, but does slowly increase as the number of keywords increases.  This does suggest there is somewhat of a positive correlation betweent the two variables.
+This plot shows the binning of the number of images associated with number of keywords.  Generally speaking the number of images remains low for each count of keywords, but does slowly increase as the number of keywords increases.  This does suggest there is somewhat of a positive correlation between the two variables.
 
 ```{r graph1}
 ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) + 
