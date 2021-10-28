@@ -1,13 +1,13 @@
 ---
 title: "`r params$channel` Analysis"
 author: "Group 6, Xavier Genelin, Dave Bergeron"
-date: "10/27/2021"
+date: "10/28/2021"
 output: 
   github_document:
     html_preview: FALSE
     toc: TRUE
 params:
-  channel: world
+  channel: World
 ---
 
 I don't think we need all of these libraries. We can keep them for now but the project doesn't require anything with SQL so those can be removed later.
@@ -30,7 +30,6 @@ library(lattice)
 library(caret) #used
 library(ciTools)
 library(plot3D)
-library(ggplot2) #used
 library(MuMIn)
 library(devtools)
 library(pls)
@@ -139,6 +138,7 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
   geom_point(aes(color = weekday)) +
   labs(title = "Shares vs Number of Images by Weekday", x = "Number of Images", y = "Shares")
 ```
+
 ## Graph 4
 
 This graph shows the relationship between the global subjectivity and rate of positive words.  Their is a positive correlation between the variables that increases at a decreasing rate then starts to decline, suggesting that the rate of positive words is highest when global subjectivity is .75.
@@ -150,7 +150,6 @@ ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) 
   labs(x = "Global Subjectivity", y = "Rate Positive Words", 
        title="Correlation of Global Subjectivity to Rate of Positive Words", colour = "Rate Positive Words")
 ```
-
 
 ## Graph 5
 
@@ -172,7 +171,6 @@ corrs <- cor(newsTrain %>% select(!weekday))
 
 corrplot(corrs, method =  "color", tl.cex = 0.5, type = "upper")
 ```
-
 
 ## Contingency Tables
 
@@ -215,11 +213,16 @@ In this section we're going to compare the following models: random forest, line
 Linear Regression models are used for understanding the relationship between input and output numerical variables. These models can take on many forms from simple where one variable is used to predict a response to multiple regression where multiple predictor variables are used to predict a response.  Additionally, and in the context of this assignment, different techniques can be used to prepare or train the linear regression equation from data, the most common of which is called Ordinary Least Squares.  The two models below are both multiple linear regression models, where multiple predictors from a training set of data are being used to predict the number of shares.
 
 ```{r lm1}
-worldtrainglmfit <- lm(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
 
-pred1 <- predict(worldtrainglmfit, newdata = newsTest)
+trainglmfit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = newsTrain, method = "lm", trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+
+pred1 <- predict(trainglmfit, newdata = newsTest)
 
 lm1Results <- postResample(pred1, obs = newsTest$shares)
+
+stopCluster(cl)
 ```
 
 ```{r lm2}
@@ -275,15 +278,19 @@ wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_
                                        .interaction.depth = seq(1, 4, by = 1), 
                                        .shrinkage = (0.1), 
                                        .n.minobsinnode = (10)))
+
+wtPred <- predict(wtFit, newsTest)
+
+wtResults <- postResample(wtPred, obs = newsTest$shares)
+
 stopCluster(cb)
-wtFit
 ```
 
 # Comparison
 
 ```{r comparison}
 # started the comparison with a table
-data.frame(lm1Results, mlrResults, rfResults)
+data.frame(lm1Results, mlrResults, rfResults, wtResults)
 ```
 
 

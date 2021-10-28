@@ -1,7 +1,7 @@
 World Analysis
 ================
 Group 6, Xavier Genelin, Dave Bergeron
-10/27/2021
+10/28/2021
 
 I don’t think we need all of these libraries. We can keep them for now
 but the project doesn’t require anything with SQL so those can be
@@ -146,7 +146,9 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
   labs(title = "Shares vs Number of Images by Weekday", x = "Number of Images", y = "Shares")
 ```
 
-![](../Reports/World_files/figure-gfmgraph3-1.png)<!-- --> \#\# Graph 4
+![](../Reports/World_files/figure-gfmgraph3-1.png)<!-- -->
+
+## Graph 4
 
 This graph shows the relationship between the global subjectivity and
 rate of positive words. Their is a positive correlation between the
@@ -341,18 +343,15 @@ newsTrain %>%
 ```
 
     ## # A tibble: 7 x 8
-    ##   weekday     Min    Q1  Mean
-    ##   <fct>     <dbl> <dbl> <dbl>
-    ## 1 Monday      111  835  2441.
-    ## 2 Tuesday      42  761  2395.
-    ## 3 Wednesday    48  785  1862.
-    ## 4 Thursday     42  788. 2591.
-    ## 5 Friday       35  853  2163.
-    ## 6 Saturday     43 1000  2434.
-    ## 7 Sunday       91 1100  2635.
-    ## # ... with 4 more variables:
-    ## #   Median <dbl>, Q3 <dbl>,
-    ## #   Max <dbl>, SD <dbl>
+    ##   weekday     Min    Q1  Mean Median    Q3    Max     SD
+    ##   <fct>     <dbl> <dbl> <dbl>  <dbl> <dbl>  <dbl>  <dbl>
+    ## 1 Monday      111  835  2441.   1100  1800 141400  7466.
+    ## 2 Tuesday      42  761  2395.   1100  1700 115700  6536.
+    ## 3 Wednesday    48  785  1862.   1100  1700  49800  2922.
+    ## 4 Thursday     42  788. 2591.   1100  1800 284700 10019.
+    ## 5 Friday       35  853  2163.   1100  1800 128500  5432.
+    ## 6 Saturday     43 1000  2434.   1500  2600  25200  3010.
+    ## 7 Sunday       91 1100  2635.   1400  2300  55600  4807.
 
 # Modeling
 
@@ -375,11 +374,16 @@ regression models, where multiple predictors from a training set of data
 are being used to predict the number of shares.
 
 ``` r
-worldtrainglmfit <- lm(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
 
-pred1 <- predict(worldtrainglmfit, newdata = newsTest)
+trainglmfit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = newsTrain, method = "lm", trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+
+pred1 <- predict(trainglmfit, newdata = newsTest)
 
 lm1Results <- postResample(pred1, obs = newsTest$shares)
+
+stopCluster(cl)
 ```
 
 ``` r
@@ -468,147 +472,21 @@ wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_
     ##     75 41358651.2660             nan     0.1000 -26784.8451
 
 ``` r
-stopCluster(cb)
-wtFit
-```
+wtPred <- predict(wtFit, newsTest)
 
-    ## Stochastic Gradient Boosting 
-    ## 
-    ## 5900 samples
-    ##    6 predictor
-    ## 
-    ## Pre-processing: centered
-    ##  (6), scaled (6) 
-    ## Resampling: Cross-Validated (5 fold) 
-    ## Summary of sample sizes: 4720, 4721, 4720, 4719, 4720 
-    ## Resampling results across tuning parameters:
-    ## 
-    ##   interaction.depth  n.trees
-    ##   1                   25    
-    ##   1                   50    
-    ##   1                   75    
-    ##   1                  100    
-    ##   1                  125    
-    ##   1                  150    
-    ##   1                  175    
-    ##   1                  200    
-    ##   2                   25    
-    ##   2                   50    
-    ##   2                   75    
-    ##   2                  100    
-    ##   2                  125    
-    ##   2                  150    
-    ##   2                  175    
-    ##   2                  200    
-    ##   3                   25    
-    ##   3                   50    
-    ##   3                   75    
-    ##   3                  100    
-    ##   3                  125    
-    ##   3                  150    
-    ##   3                  175    
-    ##   3                  200    
-    ##   4                   25    
-    ##   4                   50    
-    ##   4                   75    
-    ##   4                  100    
-    ##   4                  125    
-    ##   4                  150    
-    ##   4                  175    
-    ##   4                  200    
-    ##   RMSE      Rsquared  
-    ##   6000.173  0.01574460
-    ##   6014.412  0.01874216
-    ##   5996.015  0.02072217
-    ##   6010.621  0.02025284
-    ##   6015.465  0.01987163
-    ##   6014.627  0.02050615
-    ##   6017.356  0.02017823
-    ##   6009.963  0.02027472
-    ##   6070.774  0.01409621
-    ##   6114.202  0.01561580
-    ##   6133.134  0.01478230
-    ##   6150.798  0.01572920
-    ##   6153.054  0.01704299
-    ##   6187.009  0.01669648
-    ##   6193.575  0.01764587
-    ##   6205.638  0.01831524
-    ##   6057.341  0.01642703
-    ##   6086.757  0.01712460
-    ##   6070.288  0.01942412
-    ##   6097.179  0.01962290
-    ##   6128.864  0.01988972
-    ##   6125.864  0.02114285
-    ##   6163.859  0.01904161
-    ##   6193.823  0.01986473
-    ##   6091.218  0.01272326
-    ##   6127.421  0.01635532
-    ##   6158.858  0.01705550
-    ##   6201.300  0.01711393
-    ##   6237.283  0.01685410
-    ##   6263.314  0.01833831
-    ##   6250.534  0.01834005
-    ##   6291.418  0.01844238
-    ##   MAE     
-    ##   1970.812
-    ##   1974.064
-    ##   1956.375
-    ##   1946.557
-    ##   1956.601
-    ##   1954.242
-    ##   1962.279
-    ##   1950.003
-    ##   1987.863
-    ##   1989.086
-    ##   1992.917
-    ##   1994.303
-    ##   2007.735
-    ##   2018.342
-    ##   2021.068
-    ##   2024.994
-    ##   1969.028
-    ##   1981.547
-    ##   1981.860
-    ##   1997.855
-    ##   2008.983
-    ##   2008.871
-    ##   2022.920
-    ##   2038.959
-    ##   1974.295
-    ##   2001.058
-    ##   2016.640
-    ##   2047.706
-    ##   2052.036
-    ##   2068.158
-    ##   2080.778
-    ##   2093.046
-    ## 
-    ## Tuning parameter
-    ##  held constant at a value
-    ##  of 10
-    ## RMSE was used to select
-    ##  the optimal model using
-    ##  the smallest value.
-    ## The final values used for
-    ##  1, shrinkage = 0.1
-    ##  and n.minobsinnode = 10.
+wtResults <- postResample(wtPred, obs = newsTest$shares)
+
+stopCluster(cb)
+```
 
 # Comparison
 
 ``` r
 # started the comparison with a table
-data.frame(lm1Results, mlrResults, rfResults)
+data.frame(lm1Results, mlrResults, rfResults, wtResults)
 ```
 
-    ##            lm1Results
-    ## RMSE     4.617892e+03
-    ## Rsquared 2.334528e-02
-    ## MAE      1.844947e+03
-    ##            mlrResults
-    ## RMSE     4.599819e+03
-    ## Rsquared 3.088937e-02
-    ## MAE      1.835799e+03
-    ##             rfResults
-    ## RMSE     4677.4276319
-    ## Rsquared    0.0220365
-    ## MAE      1871.8115205
+    ##            lm1Results   mlrResults    rfResults    wtResults
+    ## RMSE     4.617892e+03 4.599819e+03 4.675371e+03 4.656408e+03
+    ## Rsquared 2.334528e-02 3.088937e-02 2.244647e-02 2.043926e-02
+    ## MAE      1.844947e+03 1.835799e+03 1.875904e+03 1.843115e+03
