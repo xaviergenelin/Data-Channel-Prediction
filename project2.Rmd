@@ -18,7 +18,7 @@ Xavier: I've added a comment to each of them that I've used
 
 ```{r setup, include=FALSE}
 imagePath <- paste0("../Reports/", params$channel, "_files/figure-gfm")
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.path = imagePath)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse) # used
 library(rmarkdown) #used
 library(parallel) # used
@@ -86,7 +86,7 @@ newsTest <- news[-trainIndex, ]
 
 # Summarizations
 
-I was hoping to see the correlation plot for the variables to see what was most related to shares. Kind of rough with the large number of variables
+In this section we'll be analyzing our training set both graphically and numerically. 
 
 ## Graph 1
 
@@ -204,7 +204,10 @@ Linear Regression models are used for understanding the relationship between inp
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
-trainglmfit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = newsTrain, method = "lm", trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+trainglmfit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, 
+                     data = newsTrain, method = "lm", 
+                     trControl = trainControl(method = "cv", number = 10), 
+                     preProcess = c("center", "scale"))
 
 pred1 <- predict(trainglmfit, newdata = newsTest)
 
@@ -217,7 +220,10 @@ stopCluster(cl)
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
-mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, method = "lm", trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
+                data = newsTrain, method = "lm", 
+                trControl = trainControl(method = "cv", number = 10), 
+                preProcess = c("center", "scale"))
 
 mlrPred <- predict(mlrFit, newsTest)
 

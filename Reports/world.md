@@ -14,8 +14,8 @@ Xavier: I’ve added a comment to each of them that I’ve used
 
 # Introduction
 
-For this project, we’ll be analyzing the (Online News Popularity Data
-Set)\[<https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity>\]
+For this project, we’ll be analyzing the [Online News Popularity Data
+Set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity)
 from the UCI Machine Learning Repository. For this analysis, we’ll be
 examining the World data channel. Our analysis for this channel will go
 into an exploratory data analysis with different graphs and numerical
@@ -83,9 +83,8 @@ newsTest <- news[-trainIndex, ]
 
 # Summarizations
 
-I was hoping to see the correlation plot for the variables to see what
-was most related to shares. Kind of rough with the large number of
-variables
+In this section we’ll be analyzing our training set both graphically and
+numerically.
 
 ## Graph 1
 
@@ -101,7 +100,7 @@ ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) +
   labs(x = "Keywords", y = "Number of Images", title="Images to Keywords", colour = "num_imgs")
 ```
 
-![](../Reports/World_files/figure-gfmgraph1-1.png)<!-- -->
+![](Reports/World_files/figure-gfm/graph1-1.png)<!-- -->
 
 ## Graph 2
 
@@ -127,7 +126,7 @@ ggplot(newsTrain, aes(x = weekday, y = shares)) +
   labs(title = "Shares by Weekday", subtitle = "Means shown in navy blue", x = "Weekday", y = "Shares")
 ```
 
-![](../Reports/World_files/figure-gfmgraph2-1.png)<!-- -->
+![](Reports/World_files/figure-gfm/graph2-1.png)<!-- -->
 
 ## Graph 3
 
@@ -146,7 +145,7 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
   labs(title = "Shares vs Number of Images by Weekday", x = "Number of Images", y = "Shares")
 ```
 
-![](../Reports/World_files/figure-gfmgraph3-1.png)<!-- -->
+![](Reports/World_files/figure-gfm/graph3-1.png)<!-- -->
 
 ## Graph 4
 
@@ -164,7 +163,7 @@ ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) 
        title="Correlation of Global Subjectivity to Rate of Positive Words", colour = "Rate Positive Words")
 ```
 
-![](../Reports/World_files/figure-gfmgraph4-1.png)<!-- -->
+![](Reports/World_files/figure-gfm/graph4-1.png)<!-- -->
 
 ## Graph 5
 
@@ -181,7 +180,7 @@ ggplot(newsTrain, aes(x=timedelta)) +
   labs(title="Shares across timedelta", y="Shares")
 ```
 
-![](../Reports/World_files/figure-gfmgraph5-1.png)<!-- -->
+![](Reports/World_files/figure-gfm/graph5-1.png)<!-- -->
 
 ## Graph 6
 
@@ -201,7 +200,7 @@ corrs <- cor(newsTrain %>% select(!weekday))
 corrplot(corrs, method =  "color", tl.cex = 0.5, type = "upper")
 ```
 
-![](../Reports/World_files/figure-gfmgraph6-1.png)<!-- -->
+![](Reports/World_files/figure-gfm/graph6-1.png)<!-- -->
 
 ## Contingency Tables
 
@@ -378,7 +377,10 @@ are being used to predict the number of shares.
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
-trainglmfit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = newsTrain, method = "lm", trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+trainglmfit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, 
+                     data = newsTrain, method = "lm", 
+                     trControl = trainControl(method = "cv", number = 10), 
+                     preProcess = c("center", "scale"))
 
 pred1 <- predict(trainglmfit, newdata = newsTest)
 
@@ -391,7 +393,10 @@ stopCluster(cl)
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
-mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, method = "lm", trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
+                data = newsTrain, method = "lm", 
+                trControl = trainControl(method = "cv", number = 10), 
+                preProcess = c("center", "scale"))
 
 mlrPred <- predict(mlrFit, newsTest)
 
@@ -501,4 +506,4 @@ knitr::kable(results)
 | Boosted Trees  | 4656.408 | 0.0204393 | 1843.115 |
 
 The best model out of the 4 that were tested was Linear Model 2 with an
-RMSE of 4599.8193812.
+RMSE of 4599.82.
