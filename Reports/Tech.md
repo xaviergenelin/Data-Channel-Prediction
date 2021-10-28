@@ -4,8 +4,8 @@ Group 6, Xavier Genelin, Dave Bergeron
 10/28/2021
 
 -   [Introduction](#introduction)
--   [Load Data w/Automation](#load-data-wautomation)
--   [Summarizations](#summarizations)
+-   [Load and Manipulate Data](#load-and-manipulate-data)
+-   [Data Exploration](#data-exploration)
     -   [Graph 1](#graph-1)
     -   [Graph 2](#graph-2)
     -   [Graph 3](#graph-3)
@@ -18,6 +18,8 @@ Group 6, Xavier Genelin, Dave Bergeron
     -   [Numerical Summary](#numerical-summary)
 -   [Modeling](#modeling)
     -   [Linear Regression](#linear-regression)
+        -   [Linear Model 1](#linear-model-1)
+        -   [Linear Model 2](#linear-model-2)
     -   [Ensemble](#ensemble)
         -   [Random Forest](#random-forest)
         -   [Boosted Tree](#boosted-tree)
@@ -41,7 +43,7 @@ Libraries that are being used:
 -   `corrplot`  
 -   `doParellel`
 
-# Load Data w/Automation
+# Load and Manipulate Data
 
 Before doing our analysis, we need to load in the data and do some data
 manipulation. Since we are only looking at the Tech data channel, we’ll
@@ -93,7 +95,7 @@ newsTrain <- news[trainIndex, ]
 newsTest <- news[-trainIndex, ]
 ```
 
-# Summarizations
+# Data Exploration
 
 In this section we’ll be analyzing our training set both graphically and
 numerically.
@@ -104,7 +106,7 @@ This plot shows the binning of the number of images associated with
 number of keywords. Generally speaking the number of images remains low
 for each count of keywords, but does slowly increase as the number of
 keywords increases. This does suggest there is somewhat of a positive
-correlation betweent the two variables.
+correlation between the two variables.
 
 ``` r
 ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) + 
@@ -470,6 +472,13 @@ Ordinary Least Squares. The two models below are both multiple linear
 regression models, where multiple predictors from a training set of data
 are being used to predict the number of shares.
 
+### Linear Model 1
+
+The first linear model we’ll look at uses the variables `num_imgs`,
+`kw_min_avg`, `kw_max_avg`, and `kw_avg_avg`. The values are centered
+and scaled and the model use 10-fold cross validation on the training
+set.
+
 ``` r
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
@@ -485,6 +494,13 @@ lm1Results <- postResample(pred1, obs = newsTest$shares)
 
 stopCluster(cl)
 ```
+
+### Linear Model 2
+
+The next linear model uses the variables `num_imgs`, `kw_avg_avg`,
+`LDA_02`, `LDA_03`, `average_token_length`, and `rate_negative_words`.
+Similar to the previous model, the values are centered and scaled and
+this uses 10-fold cross validation on the training set.
 
 ``` r
 cl <- makePSOCKcluster(5)
@@ -513,7 +529,12 @@ from bagging is not all predictors are used, rather a random subset of
 predictors for each bootstrap sample/tree fit is utilized. This approach
 minimizes the impact in the event a strong predictor is utilized.
 Instead, by randomly selecting a subset of predictors, a good predictor
-won’t dominate the tree fit.
+won’t dominate the tree fit. The random forest model uses the variables
+`num_imgs`, `kw_avg_avg`, `LDA_02`, `LDA_03`, `average_token_length`,
+and `rate_negative_words`. Those values are centered and scaled and this
+uses 5-fold cross validation on the training set. We’re also testing
+different tuning parameters to see which produces the optimal model.
+We’ll check the tuning parameter `mtry` for values from 1 to 7.
 
 ``` r
 # make cluster for parallel computing
@@ -534,11 +555,7 @@ rfPred <- predict(rfFit, newsTest)
 rfResults <- postResample(rfPred, obs = newsTest$shares)
 
 stopCluster(cl)
-
-rfFit$bestTune[[1]]
 ```
-
-    ## [1] 1
 
 The optimal mtry value for the random forest model is 1.
 
@@ -551,7 +568,15 @@ on a modified version of original data. The predictions are updated as
 the trees are grown. Given the slow fitting of the model, it can often
 be one of the preferred choices compared to bagging and random forest.
 In the code, one can observe the shrinkage parameter is 0.1, sets the
-speed of the fitting process and can be used to slow it down.
+speed of the fitting process and can be used to slow it down. The
+boosted tree is using the variables `num_imgs`, `kw_avg_avg`, `LDA_02`,
+`LDA_03`, `average_token_length`, and `rate_negative_words`. Those
+values are centered and scaled and this uses 5-fold cross validation on
+the training set. Similar to the random forest model, we’ll be besting
+different tuning parameters to determine which is the optimal model for
+these variables. The shrinkage and n.minobsinnode are set to 0.1 and 10
+respectively, but then we’re also checking for the number of trees from
+25, 50, 75, …, 200 and an interaction depth of 1, 2, 3, and 4.
 
 ``` r
 cb <- makePSOCKcluster(5)
