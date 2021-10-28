@@ -3,6 +3,26 @@ Entertainment Analysis
 Group 6, Xavier Genelin, Dave Bergeron
 10/28/2021
 
+-   [Introduction](#introduction)
+-   [Load Data w/Automation](#load-data-wautomation)
+-   [Summarizations](#summarizations)
+    -   [Graph 1](#graph-1)
+    -   [Graph 2](#graph-2)
+    -   [Graph 3](#graph-3)
+    -   [Graph 4](#graph-4)
+    -   [Graph 5](#graph-5)
+    -   [Graph 6](#graph-6)
+    -   [Contingency Tables](#contingency-tables)
+        -   [2-way Contingency Table](#2-way-contingency-table)
+        -   [3-Way Contingency Table](#3-way-contingency-table)
+    -   [Numerical Summary](#numerical-summary)
+-   [Modeling](#modeling)
+    -   [Linear Regression](#linear-regression)
+    -   [Ensemble](#ensemble)
+        -   [Random Forest](#random-forest)
+        -   [Boosted Tree](#boosted-tree)
+-   [Comparison](#comparison)
+
 # Introduction
 
 For this project, we’ll be analyzing the [Online News Popularity Data
