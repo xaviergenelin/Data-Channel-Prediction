@@ -10,7 +10,6 @@ params:
   channel: channel
 ---
 
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse) 
@@ -22,7 +21,11 @@ library(doParallel)
 
 # Introduction
 
-For this project, we'll be analyzing the [Online News Popularity Data Set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity) from the UCI Machine Learning Repository. For this analysis, we'll be examining the `r params$channel` data channel. Our analysis for this channel will go into an exploratory data analysis with different graphs and numerical summaries, as well as trying to predict the number of shares with different types of models. 
+For this project, we'll be analyzing the [Online News Popularity Data Set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity) from the UCI Machine Learning Repository. For this analysis, we'll be examining the `r params$channel` data channel. Our analysis for this channel will go into an exploratory data analysis with different graphs and numerical summaries, as well as trying to predict the number of shares with different types of models. We'll examine different variables in our analysis, but `shares` is our main variable of interest throughout this report. This is the response variable that will be used in each of the predictive models. 
+
+Our exploratory analysis will look at how the variables `weekday` (day of the week), , `num_imgs` (number of images), and `timedelta` (days between article publication and dataset acquisition) relate to the number of shares. We also examine how `rate_positive_words` (rate of positive words among non-neutral tokens) and `global_subjectivity` (text subjectivity) relate to one another.
+
+Our predictive models will be looking at how well the variables `num_imgs`, `kw_avg_avg` (Average keyword for average shares), `LDA_02` (Closeness to LDA topic 2), `LDA_03` (Closeness to LDA topic 3), `average_token_length` (average length of words in the content), `rate_negative_words` (rate of negative words among non-neutral tokens), `kw_min_avg` (worst keyword for minimum shares), and `kw_max_avg` (best keyword for average shares) are able to predict the number of `shares` for different models. 
 
 Libraries that are being used:  
 
