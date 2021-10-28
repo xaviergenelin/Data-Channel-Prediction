@@ -482,11 +482,83 @@ stopCluster(cb)
 # Comparison
 
 ``` r
+library(kableExtra)
 # started the comparison with a table
-data.frame(lm1Results, mlrResults, rfResults, wtResults)
+results <- data.frame(lm1Results, mlrResults, rfResults, wtResults)
+
+knitr::kable(results, col.names = c("Linear Model 1", "Linear Model 2", "Random Forest", "Boosted Tree"))
 ```
 
-    ##            lm1Results   mlrResults    rfResults    wtResults
-    ## RMSE     4.617892e+03 4.599819e+03 4.675371e+03 4.656408e+03
-    ## Rsquared 2.334528e-02 3.088937e-02 2.244647e-02 2.043926e-02
-    ## MAE      1.844947e+03 1.835799e+03 1.875904e+03 1.843115e+03
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Linear Model 1
+</th>
+<th style="text-align:right;">
+Linear Model 2
+</th>
+<th style="text-align:right;">
+Random Forest
+</th>
+<th style="text-align:right;">
+Boosted Tree
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+RMSE
+</td>
+<td style="text-align:right;">
+4617.8919900
+</td>
+<td style="text-align:right;">
+4599.8193812
+</td>
+<td style="text-align:right;">
+4675.3706439
+</td>
+<td style="text-align:right;">
+4656.4078824
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Rsquared
+</td>
+<td style="text-align:right;">
+0.0233453
+</td>
+<td style="text-align:right;">
+0.0308894
+</td>
+<td style="text-align:right;">
+0.0224465
+</td>
+<td style="text-align:right;">
+0.0204393
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MAE
+</td>
+<td style="text-align:right;">
+1844.9471794
+</td>
+<td style="text-align:right;">
+1835.7993441
+</td>
+<td style="text-align:right;">
+1875.9041362
+</td>
+<td style="text-align:right;">
+1843.1150156
+</td>
+</tr>
+</tbody>
+</table>

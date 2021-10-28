@@ -15,13 +15,3 @@ for(channel in channelList){
   )
 
 }
-
-  
-## render code for the main project
-# rmarkdown::render(
-#   "project2.Rmd",
-#   output_format = "github_document" (html_preview = FALSE),
-#   output_file = "README.md",
-#   encoding = "UTF-8",
-#   params = list(channel = "world")
-# )

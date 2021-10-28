@@ -289,8 +289,11 @@ stopCluster(cb)
 # Comparison
 
 ```{r comparison}
+library(kableExtra)
 # started the comparison with a table
-data.frame(lm1Results, mlrResults, rfResults, wtResults)
+results <- data.frame(lm1Results, mlrResults, rfResults, wtResults)
+
+knitr::kable(results, col.names = c("Linear Model 1", "Linear Model 2", "Random Forest", "Boosted Tree"))
 ```
 
 
