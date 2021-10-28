@@ -16,6 +16,7 @@ different types of models.
 Libraries that are being used:
 
 -   `tidyverse`  
+-   `rmarkdown`  
 -   `caret`  
 -   `corrplot`  
 -   `doParellel`
@@ -109,6 +110,7 @@ the boxplot.
 # get the average shares by weekday
 avgValues <- newsTrain %>% group_by(weekday) %>% summarise(avg = mean(shares)) 
 
+# ylim added because it was impossible to see anything without it due to large outliers
 ggplot(newsTrain, aes(x = weekday, y = shares)) +
   geom_boxplot(fill = "grey") + 
   coord_cartesian(ylim = c(0,10000)) +
@@ -141,7 +143,7 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
 ## Graph 4
 
 This graph shows the relationship between the global subjectivity and
-rate of positive words. Their is a positive correlation between the
+rate of positive words. There is a positive correlation between the
 variables that increases at a decreasing rate then starts to decline,
 suggesting that the rate of positive words is highest when global
 subjectivity is .75.
@@ -410,9 +412,13 @@ Instead, by randomly selecting a subset of predictors, a good predictor
 won’t dominate the tree fit.
 
 ``` r
+# make cluster for parallel computing
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
+# random forest model with preprocessed data that is centered and scaled
+# use 5-fold cross validation
+# mtry from 1:7
 rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
                data = newsTrain, method = "rf", 
                preProcess = c("center", "scale"), 
@@ -422,9 +428,15 @@ rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_
 rfPred <- predict(rfFit, newsTest)
 
 rfResults <- postResample(rfPred, obs = newsTest$shares)
-#rfFit$bestTune best mtry value
+
 stopCluster(cl)
+
+rfFit$bestTune[[1]]
 ```
+
+    ## [1] 1
+
+The optimal mtry value for the random forest model is 1.
 
 ### Boosted Tree
 
@@ -476,6 +488,10 @@ wtResults <- postResample(wtPred, obs = newsTest$shares)
 stopCluster(cb)
 ```
 
+The optimal tuning parameters for the boosted tree were 75 trees and an
+interaction depth of 1, along with the default values for `shrinkage`
+and `n.minobsinnode`.
+
 # Comparison
 
 ``` r
@@ -497,4 +513,4 @@ knitr::kable(results)
 | Boosted Trees  | 4656.408 | 0.0204393 | 1843.115 |
 
 The best model out of the 4 that were tested was Linear Model 2 with an
-RMSE of 4599.82.
+RMSE of 4599.8193812.
