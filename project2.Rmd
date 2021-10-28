@@ -21,22 +21,23 @@ imagePath <- paste0("../Reports/", params$channel, "_files/figure-gfm")
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.path = imagePath)
 library(tidyverse) # used
 library(knitr)
-library(rmarkdown)
+library(rmarkdown) #used
 library(haven)
 library(readxl)
 library(parallel) # used
 library(purrr)
 library(lattice)
-library(caret)
+library(caret) #used
 library(ciTools)
 library(plot3D)
+library(ggplot2) #used
 library(MuMIn)
 library(devtools)
 library(pls)
 library(corrplot) # used
 library(car)
 library(class)
-library(gbm)
+library(gbm) # used
 library(randomForest)
 library(doParallel) # used
 ```
@@ -104,10 +105,12 @@ I was hoping to see the correlation plot for the variables to see what was most 
 
 ## Graph 1
 
+This plot shows the binning of the number of images associated with number of keywords.  Generally speaking the number of images remains low for each count of keywords, but does slowly increase as the number of keywords increases.  This does suggest there is somewhat of a positive correlation betweent the two variables.
+
 ```{r graph1}
 ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) + 
-  geom_point(aes(color = shares), position = "jitter") + 
-  labs(x = "Keywords", y = "Number of Images", title="Images to Keywords", colour = "Shares")
+  geom_point(aes(color = num_imgs), position = "jitter") + 
+  labs(x = "Keywords", y = "Number of Images", title="Images to Keywords", colour = "num_imgs")
 ```
 
 
@@ -136,7 +139,9 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
   geom_point(aes(color = weekday)) +
   labs(title = "Shares vs Number of Images by Weekday", x = "Number of Images", y = "Shares")
 ```
-## Graph 4 - Test
+## Graph 4
+
+This graph shows the relationship between the global subjectivity and rate of positive words.  Their is a positive correlation between the variables that increases at a decreasing rate then starts to decline, suggesting that the rate of positive words is highest when global subjectivity is .75.
 
 ```{r graph4}
 ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
@@ -148,6 +153,8 @@ ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) 
 
 
 ## Graph 5
+
+This plot shows the number of shares across the time delta variable.  The overall number of shares is highest when the timedelta is around 75, then is less frequent as the timedelta grows larger.  There are some intermittent spikes of shares time deltas of 275 and 425. This chart also suggests that number of shares will be less as the timedelta grows larger.
 
 ```{r graph5}
 ggplot(newsTrain, aes(x=timedelta)) + 
@@ -171,7 +178,7 @@ corrplot(corrs, method =  "color", tl.cex = 0.5, type = "upper")
 
 ### 2-way Contingency Table
 
-Showing counts of keywords that appear on the weekend vs. not on the weekend.
+This contingency table shows the relationship of number of keywords observed on the weekend.  The 0 column represents weekdays, which should suggest the overall counts for that column will be larger that the 1 column.  The interesting observation is the counts appear to be someone proportional to one another, with the distributions appearing to mirror one another.  The implies there is consistency of the number of key words observed between the weekdays and weekends.  
 
 ```{r cont2, eval=TRUE, echo=TRUE}
 table(newsTrain$num_keywords, newsTrain$is_weekend)
@@ -179,7 +186,7 @@ table(newsTrain$num_keywords, newsTrain$is_weekend)
 
 ### 3-Way Contingency Table
 
-I need to figure out what a kw_min_min means, but it works for the three way table given the fixed number of categories.
+This contingency table takes the 2-way table above and breaks it down further by the worst keyword (min shares) variable.  The majority of the keywords fall into the -1, 4, and 217 bins.  
 
 ```{r cont3, eval=TRUE, echo=TRUE}
 table(newsTrain$num_keywords, newsTrain$is_weekend, newsTrain$kw_min_min)
@@ -205,9 +212,9 @@ In this section we're going to compare the following models: random forest, line
 
 ## Linear Regression
 
+Linear Regression models are used for understanding the relationship between input and output numerical variables. These models can take on many forms from simple where one variable is used to predict a response to multiple regression where multiple predictor variables are used to predict a response.  Additionally, and in the context of this assignment, different techniques can be used to prepare or train the linear regression equation from data, the most common of which is called Ordinary Least Squares.  The two models below are both multiple linear regression models, where multiple predictors from a training set of data are being used to predict the number of shares.
 
 ```{r lm1}
-#Model 1 -  Selecting predictors based on relevancy from ANOVA results after running the summary from model using all predictors in another model - 4 predictors
 worldtrainglmfit <- lm(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
 
 pred1 <- predict(worldtrainglmfit, newdata = newsTest)
@@ -232,6 +239,7 @@ stopCluster(cl)
 
 ### Random Forest
 
+This model is a random forest and one of the three tree based methods.  Random Forests use the same idea as bagging, where multiple trees are created from bootstrap samples then results are averaged.  The difference from bagging is not all predictors are used, rather a random subset of predictors for each bootstrap sample/tree fit is utilized.  This approach minimizes the impact in the event a strong predictor is utilized.  Instead, by randomly selecting a subset of predictors, a good predictor won't dominate the tree fit.
 
 ```{r randForest}
 cl <- makePSOCKcluster(5)
@@ -252,24 +260,24 @@ stopCluster(cl)
 
 ### Boosted Tree
 
-This is the boosted tree model using all predictors in the `newsTrain` data set.
+This model is a boosted tree model which falls in the family of tree based methods and is used in the slow training of trees.  This is done by having the trees grown sequentially, where each subsequent tree is grown on a modified version of original data.  The predictions are updated as the trees are grown.  Given the slow fitting of the model, it can often be one of the preferred choices compared to bagging and random forest.  In the code, one can observe the shrinkage parameter is 0.1, sets the speed of the fitting process and can be used to slow it down.
 
 ```{r bootTree}
-# set.seed(30)
-# wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
-#                data = newsTrain, method = "gbm", 
-#                preProcess = c("center", "scale"), 
-#                trControl = trainControl(method = "cv",number = 5), 
-#                tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25), 
-#                                       .interaction.depth = seq(1, 4, by = 1), 
-#                                       .shrinkage = (0.1), 
-#                                       .n.minobsinnode = (10)))
-# wtFit
+cb <- makePSOCKcluster(5)
+registerDoParallel(cb)
+
+set.seed(30)
+wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
+                data = newsTrain, method = "gbm", 
+                preProcess = c("center", "scale"), 
+                trControl = trainControl(method = "cv", number = 5), 
+                tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25), 
+                                       .interaction.depth = seq(1, 4, by = 1), 
+                                       .shrinkage = (0.1), 
+                                       .n.minobsinnode = (10)))
+stopCluster(cb)
+wtFit
 ```
-
-#### Boosted Tree Test Results
-
-Still working on this,getting an error
 
 # Comparison
 
