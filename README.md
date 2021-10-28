@@ -8,11 +8,11 @@ The purpose of this project is to analyze the [Online News Popularity Data Set](
 
 The following libraries are used in this project:
 
--   `tidyverse`  
--   `caret`  
--   `corrplot`  
--   `doParellel`  
--   `rmarkdown`
+-   `tidyverse`: read in the data, general data manipulation and plotting  
+-   `caret`: splitting the data, preproccess and resampling methods, testing and creating predictive models   
+-   `corrplot`: correlation plot for variables  
+-   `doParellel`: parallel computing to speed up code  
+-   `rmarkdown`: rendering the .Rmd files
 
 ## Data Channel Files
 
