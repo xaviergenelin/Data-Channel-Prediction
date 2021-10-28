@@ -10,11 +10,6 @@ params:
   channel: World
 ---
 
-I don't think we need all of these libraries. We can keep them for now but the project doesn't require anything with SQL so those can be removed later.
-
-Dave:  Agree, one of my bad habits not pruning the list from one assignment to the other.
-
-Xavier: I've added a comment to each of them that I've used
 
 ```{r setup, include=FALSE}
 imagePath <- paste0("../Reports/", params$channel, "_files/figure-gfm")
