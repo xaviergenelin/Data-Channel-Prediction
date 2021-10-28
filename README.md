@@ -1,23 +1,14 @@
-world Analysis
+World Analysis
 ================
 Group 6, Xavier Genelin, Dave Bergeron
-10/27/2021
-
-I don’t think we need all of these libraries. We can keep them for now
-but the project doesn’t require anything with SQL so those can be
-removed later.
-
-Dave: Agree, one of my bad habits not pruning the list from one
-assignment to the other.
-
-Xavier: I’ve added a comment to each of them that I’ve used
+10/28/2021
 
 # Introduction
 
-For this project, we’ll be analyzing the(Online News Popularity Data
-Set)\[<https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity>\]
+For this project, we’ll be analyzing the [Online News Popularity Data
+Set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity)
 from the UCI Machine Learning Repository. For this analysis, we’ll be
-examining the world data channel. Our analysis for this channel will go
+examining the World data channel. Our analysis for this channel will go
 into an exploratory data analysis with different graphs and numerical
 summaries, as well as trying to predict the number of shares with
 different types of models.
@@ -32,7 +23,7 @@ Libraries that are being used:
 # Load Data w/Automation
 
 Before doing our analysis, we need to load in the data and do some data
-manipulation. Since we are only looking at the world data channel, we’ll
+manipulation. Since we are only looking at the World data channel, we’ll
 filter the dataset on this channel and create a new variable for the
 weekday from the columns `weekday_is_*`. After filtering and creating
 the weekday variable, we’ll remove the columns that went into creating
@@ -50,12 +41,12 @@ channel <- params$channel
 # create a new column for the data channel and weekday
 news <- news %>% 
  mutate(data_channel = 
-          if_else(data_channel_is_lifestyle == 1, "lifestyle", 
-                  if_else(data_channel_is_entertainment == 1, "entertainment", 
-                          if_else(data_channel_is_bus == 1, "bus", 
-                                  if_else(data_channel_is_socmed == 1, "socmed", 
-                                          if_else(data_channel_is_tech == 1, "tech", 
-                                                  if_else(data_channel_is_world == 1, "world", "other")))))),
+          if_else(data_channel_is_lifestyle == 1, "Lifestyle", 
+                  if_else(data_channel_is_entertainment == 1, "Entertainment", 
+                          if_else(data_channel_is_bus == 1, "Bus", 
+                                  if_else(data_channel_is_socmed == 1, "Socmed", 
+                                          if_else(data_channel_is_tech == 1, "Tech", 
+                                                  if_else(data_channel_is_world == 1, "World", "other")))))),
         weekday = if_else(weekday_is_monday == 1, "Monday", 
                           if_else(weekday_is_tuesday == 1, "Tuesday",
                                   if_else(weekday_is_wednesday == 1, "Wednesday",
@@ -83,19 +74,24 @@ newsTest <- news[-trainIndex, ]
 
 # Summarizations
 
-I was hoping to see the correlation plot for the variables to see what
-was most related to shares. Kind of rough with the large number of
-variables
+In this section we’ll be analyzing our training set both graphically and
+numerically.
 
 ## Graph 1
 
+This plot shows the binning of the number of images associated with
+number of keywords. Generally speaking the number of images remains low
+for each count of keywords, but does slowly increase as the number of
+keywords increases. This does suggest there is somewhat of a positive
+correlation betweent the two variables.
+
 ``` r
 ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) + 
-  geom_point(aes(color = shares), position = "jitter") + 
-  labs(x = "Keywords", y = "Number of Images", title="Images to Keywords", colour = "Shares")
+  geom_point(aes(color = num_imgs), position = "jitter") + 
+  labs(x = "Keywords", y = "Number of Images", title="Images to Keywords", colour = "num_imgs")
 ```
 
-![](../Reports/world_files/figure-gfmgraph1-1.png)<!-- -->
+![](README_files/figure-gfm/graph1-1.png)<!-- -->
 
 ## Graph 2
 
@@ -121,7 +117,7 @@ ggplot(newsTrain, aes(x = weekday, y = shares)) +
   labs(title = "Shares by Weekday", subtitle = "Means shown in navy blue", x = "Weekday", y = "Shares")
 ```
 
-![](../Reports/world_files/figure-gfmgraph2-1.png)<!-- -->
+![](README_files/figure-gfm/graph2-1.png)<!-- -->
 
 ## Graph 3
 
@@ -140,7 +136,15 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
   labs(title = "Shares vs Number of Images by Weekday", x = "Number of Images", y = "Shares")
 ```
 
-![](../Reports/world_files/figure-gfmgraph3-1.png)<!-- --> ## Graph 4
+![](README_files/figure-gfm/graph3-1.png)<!-- -->
+
+## Graph 4
+
+This graph shows the relationship between the global subjectivity and
+rate of positive words. Their is a positive correlation between the
+variables that increases at a decreasing rate then starts to decline,
+suggesting that the rate of positive words is highest when global
+subjectivity is .75.
 
 ``` r
 ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
@@ -150,9 +154,16 @@ ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) 
        title="Correlation of Global Subjectivity to Rate of Positive Words", colour = "Rate Positive Words")
 ```
 
-![](../Reports/world_files/figure-gfmgraph4-1.png)<!-- -->
+![](README_files/figure-gfm/graph4-1.png)<!-- -->
 
 ## Graph 5
+
+This plot shows the number of shares across the time delta variable. The
+overall number of shares is highest when the timedelta is around 75,
+then is less frequent as the timedelta grows larger. There are some
+intermittent spikes of shares time deltas of 275 and 425. This chart
+also suggests that number of shares will be less as the timedelta grows
+larger.
 
 ``` r
 ggplot(newsTrain, aes(x=timedelta)) + 
@@ -160,7 +171,7 @@ ggplot(newsTrain, aes(x=timedelta)) +
   labs(title="Shares across timedelta", y="Shares")
 ```
 
-![](../Reports/world_files/figure-gfmgraph5-1.png)<!-- -->
+![](README_files/figure-gfm/graph5-1.png)<!-- -->
 
 ## Graph 6
 
@@ -180,14 +191,19 @@ corrs <- cor(newsTrain %>% select(!weekday))
 corrplot(corrs, method =  "color", tl.cex = 0.5, type = "upper")
 ```
 
-![](../Reports/world_files/figure-gfmgraph6-1.png)<!-- -->
+![](README_files/figure-gfm/graph6-1.png)<!-- -->
 
 ## Contingency Tables
 
 ### 2-way Contingency Table
 
-Showing counts of keywords that appear on the weekend vs. not on the
-weekend.
+This contingency table shows the relationship of number of keywords
+observed on the weekend. The 0 column represents weekdays, which should
+suggest the overall counts for that column will be larger that the 1
+column. The interesting observation is the counts appear to be someone
+proportional to one another, with the distributions appearing to mirror
+one another. The implies there is consistency of the number of key words
+observed between the weekdays and weekends.
 
 ``` r
 table(newsTrain$num_keywords, newsTrain$is_weekend)
@@ -207,8 +223,9 @@ table(newsTrain$num_keywords, newsTrain$is_weekend)
 
 ### 3-Way Contingency Table
 
-I need to figure out what a kw_min_min means, but it works for the three
-way table given the fixed number of categories.
+This contingency table takes the 2-way table above and breaks it down
+further by the worst keyword (min shares) variable. The majority of the
+keywords fall into the -1, 4, and 217 bins.
 
 ``` r
 table(newsTrain$num_keywords, newsTrain$is_weekend, newsTrain$kw_min_min)
@@ -309,22 +326,23 @@ to help give some values to what we saw visually earlier.
 
 ``` r
 # Shares by weekday
-newsTrain %>% 
+numSum <- newsTrain %>% 
   group_by(weekday) %>% 
   summarise(Min = min(shares), Q1 = quantile(shares, 0.25), Mean = mean(shares), 
             Median = median(shares), Q3 = quantile(shares, 0.75), Max = max(shares), SD = sd(shares))
+
+knitr::kable(numSum)
 ```
 
-    ## # A tibble: 7 x 8
-    ##   weekday     Min    Q1  Mean Median    Q3    Max     SD
-    ##   <fct>     <dbl> <dbl> <dbl>  <dbl> <dbl>  <dbl>  <dbl>
-    ## 1 Monday      111  835  2441.   1100  1800 141400  7466.
-    ## 2 Tuesday      42  761  2395.   1100  1700 115700  6536.
-    ## 3 Wednesday    48  785  1862.   1100  1700  49800  2922.
-    ## 4 Thursday     42  788. 2591.   1100  1800 284700 10019.
-    ## 5 Friday       35  853  2163.   1100  1800 128500  5432.
-    ## 6 Saturday     43 1000  2434.   1500  2600  25200  3010.
-    ## 7 Sunday       91 1100  2635.   1400  2300  55600  4807.
+| weekday   | Min |     Q1 |     Mean | Median |   Q3 |    Max |        SD |
+|:----------|----:|-------:|---------:|-------:|-----:|-------:|----------:|
+| Monday    | 111 |  835.0 | 2441.296 |   1100 | 1800 | 141400 |  7465.764 |
+| Tuesday   |  42 |  761.0 | 2395.499 |   1100 | 1700 | 115700 |  6535.872 |
+| Wednesday |  48 |  785.0 | 1862.439 |   1100 | 1700 |  49800 |  2922.421 |
+| Thursday  |  42 |  787.5 | 2590.975 |   1100 | 1800 | 284700 | 10019.067 |
+| Friday    |  35 |  853.0 | 2162.653 |   1100 | 1800 | 128500 |  5431.550 |
+| Saturday  |  43 | 1000.0 | 2434.490 |   1500 | 2600 |  25200 |  3009.766 |
+| Sunday    |  91 | 1100.0 | 2634.593 |   1400 | 2300 |  55600 |  4807.300 |
 
 # Modeling
 
@@ -335,23 +353,41 @@ predict the amount of shares for each of the data channels.
 
 ## Linear Regression
 
-``` r
-#Model 1 -  Selecting predictors based on relevancy from ANOVA results after running the summary from model using all predictors in another model - 4 predictors
-worldtrainglmfit <- lm(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
-
-pred1 <- predict(worldtrainglmfit, newdata = newsTest)
-
-postResample(pred1, obs = newsTest$shares)[2]
-```
-
-    ##   Rsquared 
-    ## 0.02334528
+Linear Regression models are used for understanding the relationship
+between input and output numerical variables. These models can take on
+many forms from simple where one variable is used to predict a response
+to multiple regression where multiple predictor variables are used to
+predict a response. Additionally, and in the context of this assignment,
+different techniques can be used to prepare or train the linear
+regression equation from data, the most common of which is called
+Ordinary Least Squares. The two models below are both multiple linear
+regression models, where multiple predictors from a training set of data
+are being used to predict the number of shares.
 
 ``` r
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
-mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, data = newsTrain, trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+trainglmfit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, 
+                     data = newsTrain, method = "lm", 
+                     trControl = trainControl(method = "cv", number = 10), 
+                     preProcess = c("center", "scale"))
+
+pred1 <- predict(trainglmfit, newdata = newsTest)
+
+lm1Results <- postResample(pred1, obs = newsTest$shares)
+
+stopCluster(cl)
+```
+
+``` r
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+
+mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
+                data = newsTrain, method = "lm", 
+                trControl = trainControl(method = "cv", number = 10), 
+                preProcess = c("center", "scale"))
 
 mlrPred <- predict(mlrFit, newsTest)
 
@@ -363,6 +399,15 @@ stopCluster(cl)
 ## Ensemble
 
 ### Random Forest
+
+This model is a random forest and one of the three tree based methods.
+Random Forests use the same idea as bagging, where multiple trees are
+created from bootstrap samples then results are averaged. The difference
+from bagging is not all predictors are used, rather a random subset of
+predictors for each bootstrap sample/tree fit is utilized. This approach
+minimizes the impact in the event a strong predictor is utilized.
+Instead, by randomly selecting a subset of predictors, a good predictor
+won’t dominate the tree fit.
 
 ``` r
 cl <- makePSOCKcluster(5)
@@ -383,34 +428,73 @@ stopCluster(cl)
 
 ### Boosted Tree
 
-This is the boosted tree model using all predictors in the `newsTrain`
-data set.
+This model is a boosted tree model which falls in the family of tree
+based methods and is used in the slow training of trees. This is done by
+having the trees grown sequentially, where each subsequent tree is grown
+on a modified version of original data. The predictions are updated as
+the trees are grown. Given the slow fitting of the model, it can often
+be one of the preferred choices compared to bagging and random forest.
+In the code, one can observe the shrinkage parameter is 0.1, sets the
+speed of the fitting process and can be used to slow it down.
 
 ``` r
-# set.seed(30)
-# wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
-#                data = newsTrain, method = "gbm", 
-#                preProcess = c("center", "scale"), 
-#                trControl = trainControl(method = "cv",number = 5), 
-#                tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25), 
-#                                       .interaction.depth = seq(1, 4, by = 1), 
-#                                       .shrinkage = (0.1), 
-#                                       .n.minobsinnode = (10)))
-# wtFit
+cb <- makePSOCKcluster(5)
+registerDoParallel(cb)
+
+set.seed(30)
+wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
+                data = newsTrain, method = "gbm", 
+                preProcess = c("center", "scale"), 
+                trControl = trainControl(method = "cv", number = 5), 
+                tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25), 
+                                       .interaction.depth = seq(1, 4, by = 1), 
+                                       .shrinkage = (0.1), 
+                                       .n.minobsinnode = (10)))
 ```
 
-#### Boosted Tree Test Results
+    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
+    ##      1 43564849.5571             nan     0.1000 9520.5888
+    ##      2 43393306.4875             nan     0.1000 20774.2917
+    ##      3 43327404.7814             nan     0.1000 38360.1262
+    ##      4 43191806.7892             nan     0.1000 40025.6883
+    ##      5 43112178.9371             nan     0.1000 37063.6335
+    ##      6 43014545.7794             nan     0.1000 -17000.2831
+    ##      7 42905318.9284             nan     0.1000 47760.7874
+    ##      8 42828100.4691             nan     0.1000 42015.3671
+    ##      9 42760680.1587             nan     0.1000 9067.6491
+    ##     10 42714361.4666             nan     0.1000 -28914.8396
+    ##     20 42319615.1150             nan     0.1000 -20513.6913
+    ##     40 41941082.3694             nan     0.1000 15724.4369
+    ##     60 41614400.8675             nan     0.1000 -1019.3049
+    ##     75 41358651.2660             nan     0.1000 -26784.8451
 
-Still working on this,getting an error
+``` r
+wtPred <- predict(wtFit, newsTest)
+
+wtResults <- postResample(wtPred, obs = newsTest$shares)
+
+stopCluster(cb)
+```
 
 # Comparison
 
 ``` r
-# started the comparison with a table
-data.frame(mlrResults, rfResults)
+results <- rbind(t(lm1Results), t(mlrResults), t(rfResults), t(wtResults))
+models <- c("Linear Model 1", "Linear Model 2", "Random Forest", "Boosted Trees")
+
+results <- data.frame(results, row.names = models)
+
+bestModel <- results %>% mutate(model = models) %>% filter(RMSE == min(RMSE))
+
+knitr::kable(results)
 ```
 
-    ##            mlrResults    rfResults
-    ## RMSE     4.717567e+03 4.652023e+03
-    ## Rsquared 2.421682e-02 2.605321e-02
-    ## MAE      1.922787e+03 1.863662e+03
+|                |     RMSE |  Rsquared |      MAE |
+|:---------------|---------:|----------:|---------:|
+| Linear Model 1 | 4617.892 | 0.0233453 | 1844.947 |
+| Linear Model 2 | 4599.819 | 0.0308894 | 1835.799 |
+| Random Forest  | 4675.371 | 0.0224465 | 1875.904 |
+| Boosted Trees  | 4656.408 | 0.0204393 | 1843.115 |
+
+The best model out of the 4 that were tested was Linear Model 2 with an
+RMSE of 4599.82.
