@@ -20,30 +20,16 @@ Xavier: I've added a comment to each of them that I've used
 imagePath <- paste0("../Reports/", params$channel, "_files/figure-gfm")
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.path = imagePath)
 library(tidyverse) # used
-library(knitr)
 library(rmarkdown) #used
-library(haven)
-library(readxl)
 library(parallel) # used
-library(purrr)
-library(lattice)
 library(caret) #used
-library(ciTools)
-library(plot3D)
-library(MuMIn)
-library(devtools)
-library(pls)
 library(corrplot) # used
-library(car)
-library(class)
-library(gbm) # used
-library(randomForest)
 library(doParallel) # used
 ```
 
 # Introduction
 
-For this project, we'll be analyzing the(Online News Popularity Data Set)[https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity] from the UCI Machine Learning Repository. For this analysis, we'll be examining the `r params$channel` data channel. Our analysis for this channel will go into an exploratory data analysis with different graphs and numerical summaries, as well as trying to predict the number of shares with different types of models. 
+For this project, we'll be analyzing the (Online News Popularity Data Set)[https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity] from the UCI Machine Learning Repository. For this analysis, we'll be examining the `r params$channel` data channel. Our analysis for this channel will go into an exploratory data analysis with different graphs and numerical summaries, as well as trying to predict the number of shares with different types of models. 
 
 Libraries that are being used:  
 
@@ -197,10 +183,12 @@ Earlier we saw the boxplots show the number of shares based on weekdays, but wit
 
 ```{r numSum}
 # Shares by weekday
-newsTrain %>% 
+numSum <- newsTrain %>% 
   group_by(weekday) %>% 
   summarise(Min = min(shares), Q1 = quantile(shares, 0.25), Mean = mean(shares), 
             Median = median(shares), Q3 = quantile(shares, 0.75), Max = max(shares), SD = sd(shares))
+
+knitr::kable(numSum)
 ```
 
 
@@ -289,15 +277,16 @@ stopCluster(cb)
 # Comparison
 
 ```{r comparison}
-library(kableExtra)
-# started the comparison with a table
-results <- data.frame(lm1Results, mlrResults, rfResults, wtResults)
+results <- rbind(t(lm1Results), t(mlrResults), t(rfResults), t(wtResults))
+models <- c("Linear Model 1", "Linear Model 2", "Random Forest", "Boosted Trees")
 
-knitr::kable(results, col.names = c("Linear Model 1", "Linear Model 2", "Random Forest", "Boosted Tree"))
+results <- data.frame(results, row.names = models)
+
+bestModel <- results %>% mutate(model = models) %>% filter(RMSE == min(RMSE))
+
+knitr::kable(results)
 ```
 
 
-
-
-
+The best model out of the 4 that were tested was `r bestModel$model` with an RMSE of `r bestModel$RMSE`.
 

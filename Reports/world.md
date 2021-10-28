@@ -14,7 +14,7 @@ Xavier: I’ve added a comment to each of them that I’ve used
 
 # Introduction
 
-For this project, we’ll be analyzing the(Online News Popularity Data
+For this project, we’ll be analyzing the (Online News Popularity Data
 Set)\[<https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity>\]
 from the UCI Machine Learning Repository. For this analysis, we’ll be
 examining the World data channel. Our analysis for this channel will go
@@ -336,22 +336,23 @@ to help give some values to what we saw visually earlier.
 
 ``` r
 # Shares by weekday
-newsTrain %>% 
+numSum <- newsTrain %>% 
   group_by(weekday) %>% 
   summarise(Min = min(shares), Q1 = quantile(shares, 0.25), Mean = mean(shares), 
             Median = median(shares), Q3 = quantile(shares, 0.75), Max = max(shares), SD = sd(shares))
+
+knitr::kable(numSum)
 ```
 
-    ## # A tibble: 7 x 8
-    ##   weekday     Min    Q1  Mean Median    Q3    Max     SD
-    ##   <fct>     <dbl> <dbl> <dbl>  <dbl> <dbl>  <dbl>  <dbl>
-    ## 1 Monday      111  835  2441.   1100  1800 141400  7466.
-    ## 2 Tuesday      42  761  2395.   1100  1700 115700  6536.
-    ## 3 Wednesday    48  785  1862.   1100  1700  49800  2922.
-    ## 4 Thursday     42  788. 2591.   1100  1800 284700 10019.
-    ## 5 Friday       35  853  2163.   1100  1800 128500  5432.
-    ## 6 Saturday     43 1000  2434.   1500  2600  25200  3010.
-    ## 7 Sunday       91 1100  2635.   1400  2300  55600  4807.
+| weekday   | Min |     Q1 |     Mean | Median |   Q3 |    Max |        SD |
+|:----------|----:|-------:|---------:|-------:|-----:|-------:|----------:|
+| Monday    | 111 |  835.0 | 2441.296 |   1100 | 1800 | 141400 |  7465.764 |
+| Tuesday   |  42 |  761.0 | 2395.499 |   1100 | 1700 | 115700 |  6535.872 |
+| Wednesday |  48 |  785.0 | 1862.439 |   1100 | 1700 |  49800 |  2922.421 |
+| Thursday  |  42 |  787.5 | 2590.975 |   1100 | 1800 | 284700 | 10019.067 |
+| Friday    |  35 |  853.0 | 2162.653 |   1100 | 1800 | 128500 |  5431.550 |
+| Saturday  |  43 | 1000.0 | 2434.490 |   1500 | 2600 |  25200 |  3009.766 |
+| Sunday    |  91 | 1100.0 | 2634.593 |   1400 | 2300 |  55600 |  4807.300 |
 
 # Modeling
 
@@ -482,83 +483,22 @@ stopCluster(cb)
 # Comparison
 
 ``` r
-library(kableExtra)
-# started the comparison with a table
-results <- data.frame(lm1Results, mlrResults, rfResults, wtResults)
+results <- rbind(t(lm1Results), t(mlrResults), t(rfResults), t(wtResults))
+models <- c("Linear Model 1", "Linear Model 2", "Random Forest", "Boosted Trees")
 
-knitr::kable(results, col.names = c("Linear Model 1", "Linear Model 2", "Random Forest", "Boosted Tree"))
+results <- data.frame(results, row.names = models)
+
+bestModel <- results %>% mutate(model = models) %>% filter(RMSE == min(RMSE))
+
+knitr::kable(results)
 ```
 
-<table>
-<thead>
-<tr>
-<th style="text-align:left;">
-</th>
-<th style="text-align:right;">
-Linear Model 1
-</th>
-<th style="text-align:right;">
-Linear Model 2
-</th>
-<th style="text-align:right;">
-Random Forest
-</th>
-<th style="text-align:right;">
-Boosted Tree
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-RMSE
-</td>
-<td style="text-align:right;">
-4617.8919900
-</td>
-<td style="text-align:right;">
-4599.8193812
-</td>
-<td style="text-align:right;">
-4675.3706439
-</td>
-<td style="text-align:right;">
-4656.4078824
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Rsquared
-</td>
-<td style="text-align:right;">
-0.0233453
-</td>
-<td style="text-align:right;">
-0.0308894
-</td>
-<td style="text-align:right;">
-0.0224465
-</td>
-<td style="text-align:right;">
-0.0204393
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-MAE
-</td>
-<td style="text-align:right;">
-1844.9471794
-</td>
-<td style="text-align:right;">
-1835.7993441
-</td>
-<td style="text-align:right;">
-1875.9041362
-</td>
-<td style="text-align:right;">
-1843.1150156
-</td>
-</tr>
-</tbody>
-</table>
+|                |     RMSE |  Rsquared |      MAE |
+|:---------------|---------:|----------:|---------:|
+| Linear Model 1 | 4617.892 | 0.0233453 | 1844.947 |
+| Linear Model 2 | 4599.819 | 0.0308894 | 1835.799 |
+| Random Forest  | 4675.371 | 0.0224465 | 1875.904 |
+| Boosted Trees  | 4656.408 | 0.0204393 | 1843.115 |
+
+The best model out of the 4 that were tested was Linear Model 2 with an
+RMSE of 4599.8193812.
