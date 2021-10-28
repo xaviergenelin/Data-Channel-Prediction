@@ -29,7 +29,7 @@ library(doParallel) # used
 
 # Introduction
 
-For this project, we'll be analyzing the (Online News Popularity Data Set)[https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity] from the UCI Machine Learning Repository. For this analysis, we'll be examining the `r params$channel` data channel. Our analysis for this channel will go into an exploratory data analysis with different graphs and numerical summaries, as well as trying to predict the number of shares with different types of models. 
+For this project, we'll be analyzing the [Online News Popularity Data Set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity) from the UCI Machine Learning Repository. For this analysis, we'll be examining the `r params$channel` data channel. Our analysis for this channel will go into an exploratory data analysis with different graphs and numerical summaries, as well as trying to predict the number of shares with different types of models. 
 
 Libraries that are being used:  
 
@@ -288,5 +288,5 @@ knitr::kable(results)
 ```
 
 
-The best model out of the 4 that were tested was `r bestModel$model` with an RMSE of `r bestModel$RMSE`.
+The best model out of the 4 that were tested was `r bestModel$model` with an RMSE of `r round(bestModel$RMSE, 2)`.
 
