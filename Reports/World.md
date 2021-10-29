@@ -3,28 +3,6 @@ World Analysis
 Group 6, Xavier Genelin, Dave Bergeron
 10/28/2021
 
--   [Introduction](#introduction)
--   [Load and Manipulate Data](#load-and-manipulate-data)
--   [Data Exploration](#data-exploration)
-    -   [Graph 1](#graph-1)
-    -   [Graph 2](#graph-2)
-    -   [Graph 3](#graph-3)
-    -   [Graph 4](#graph-4)
-    -   [Graph 5](#graph-5)
-    -   [Graph 6](#graph-6)
-    -   [Contingency Tables](#contingency-tables)
-        -   [2-way Contingency Table](#2-way-contingency-table)
-        -   [3-Way Contingency Table](#3-way-contingency-table)
-    -   [Numerical Summary](#numerical-summary)
--   [Modeling](#modeling)
-    -   [Linear Regression](#linear-regression)
-        -   [Linear Model 1](#linear-model-1)
-        -   [Linear Model 2](#linear-model-2)
-    -   [Ensemble](#ensemble)
-        -   [Random Forest](#random-forest)
-        -   [Boosted Tree](#boosted-tree)
--   [Comparison](#comparison)
-
 # Introduction
 
 For this project, we’ll be analyzing the [Online News Popularity Data
@@ -33,7 +11,26 @@ from the UCI Machine Learning Repository. For this analysis, we’ll be
 examining the World data channel. Our analysis for this channel will go
 into an exploratory data analysis with different graphs and numerical
 summaries, as well as trying to predict the number of shares with
-different types of models.
+different types of models. We’ll examine different variables in our
+analysis, but `shares` is our main variable of interest throughout this
+report. This is the response variable that will be used in each of the
+predictive models.
+
+Our exploratory analysis will look at how the variables `weekday` (day
+of the week), , `num_imgs` (number of images), and `timedelta` (days
+between article publication and dataset acquisition) relate to the
+number of shares. We also examine how `rate_positive_words` (rate of
+positive words among non-neutral tokens) and `global_subjectivity` (text
+subjectivity) relate to one another.
+
+Our predictive models will be looking at how well the variables
+`num_imgs`, `kw_avg_avg` (Average keyword for average shares), `LDA_02`
+(Closeness to LDA topic 2), `LDA_03` (Closeness to LDA topic 3),
+`average_token_length` (average length of words in the content),
+`rate_negative_words` (rate of negative words among non-neutral tokens),
+`kw_min_avg` (worst keyword for minimum shares), and `kw_max_avg` (best
+keyword for average shares) are able to predict the number of `shares`
+for different models.
 
 Libraries that are being used:
 
@@ -102,11 +99,12 @@ numerically.
 
 ## Graph 1
 
-This plot shows the binning of the number of images associated with
-number of keywords. Generally speaking the number of images remains low
-for each count of keywords, but does slowly increase as the number of
-keywords increases. This does suggest there is somewhat of a positive
-correlation between the two variables.
+This plot shows the number of images associated with the number of
+keywords. The chart bins the results and shows the clustering of images
+for each count of keywords. The clustering should reveal if there is a
+positive or negative relationship between the two variables, and what
+number of keywords had the most or least amount of images associated
+with it.
 
 ``` r
 ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) + 
@@ -165,10 +163,11 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
 ## Graph 4
 
 This graph shows the relationship between the global subjectivity and
-rate of positive words. There is a positive correlation between the
-variables that increases at a decreasing rate then starts to decline,
-suggesting that the rate of positive words is highest when global
-subjectivity is .75.
+rate of positive words variables. The graph returns a scatter plot along
+with a trend line in order to determine what type of relationship may
+exist between the data and variables. The plot coupled with the trend
+line should reveal if the variables potential influence one another of
+if they have a positive or negative relationship.
 
 ``` r
 ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
@@ -183,11 +182,11 @@ ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) 
 ## Graph 5
 
 This plot shows the number of shares across the time delta variable. The
-overall number of shares is highest when the timedelta is around 75,
-then is less frequent as the timedelta grows larger. There are some
-intermittent spikes of shares time deltas of 275 and 425. This chart
-also suggests that number of shares will be less as the timedelta grows
-larger.
+time delta variable represents days between article publication and data
+set acquisition. This will show where along the time delta number line
+shares may be greatest or lowest, if some sort of pattern may exist that
+is worth further exploration, or where the maximum number of shares were
+observed.
 
 ``` r
 ggplot(newsTrain, aes(x=timedelta)) + 
@@ -222,12 +221,12 @@ corrplot(corrs, method =  "color", tl.cex = 0.5, type = "upper")
 ### 2-way Contingency Table
 
 This contingency table shows the relationship of number of keywords
-observed on the weekend. The 0 column represents weekdays, which should
-suggest the overall counts for that column will be larger that the 1
-column. The interesting observation is the counts appear to be someone
-proportional to one another, with the distributions appearing to mirror
-one another. The implies there is consistency of the number of key words
-observed between the weekdays and weekends.
+observed during the days of the week and the weekend. The 0 column
+represents weekdays with the 1 column representing the weekend along
+with counts of how may times the number of keywords was observed. The
+column on the left shows the number of keywords observed. Analysis can
+be conducted to determine where the greatest and least concentrations of
+keywords were observed.
 
 ``` r
 table(newsTrain$num_keywords, newsTrain$is_weekend)
@@ -248,8 +247,10 @@ table(newsTrain$num_keywords, newsTrain$is_weekend)
 ### 3-Way Contingency Table
 
 This contingency table takes the 2-way table above and breaks it down
-further by the worst keyword (min shares) variable. The majority of the
-keywords fall into the -1, 4, and 217 bins.
+further by binning it across values of the worst keyword (min shares)
+variable. This will allow exploration of number of keywords observed on
+a weekday or weekend and see what those counts look like across the
+different worst keyword (min shares) segments
 
 ``` r
 table(newsTrain$num_keywords, newsTrain$is_weekend, newsTrain$kw_min_min)
@@ -386,7 +387,8 @@ different techniques can be used to prepare or train the linear
 regression equation from data, the most common of which is called
 Ordinary Least Squares. The two models below are both multiple linear
 regression models, where multiple predictors from a training set of data
-are being used to predict the number of shares.
+are being used to predict the number of shares which is the response
+variable.
 
 ### Linear Model 1
 
