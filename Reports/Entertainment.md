@@ -153,13 +153,15 @@ the boxplot.
 avgValues <- newsTrain %>% group_by(weekday) %>% summarise(avg = mean(shares)) 
 
 # ylim added because it was impossible to see anything without it due to large outliers
-graph2 <- ggplot(newsTrain, aes(x = weekday, y = shares)) +
+ggplot(newsTrain, aes(x = weekday, y = shares)) +
   geom_boxplot(fill = "grey") + 
   coord_cartesian(ylim = c(0,10000)) +
   geom_point(avgValues, mapping = aes(x = weekday, y = avg), color = "navy") + 
   geom_line(avgValues, mapping = aes(x = weekday, y = avg, group = 1), color = "navy") +
   labs(title = "Shares by Weekday", subtitle = "Means shown in navy blue", x = "Weekday", y = "Shares")
 ```
+
+![](../Reports/Entertainment_files/figure-gfm/graph2-1.png)<!-- -->
 
 ## Graph 3
 
@@ -190,12 +192,14 @@ line should reveal if the variables potential influence one another of
 if they have a positive or negative relationship.
 
 ``` r
-graph4 <- ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
+ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
   geom_point(aes(color = rate_positive_words), position = "jitter") + 
   geom_smooth(formula = y ~ x, method = "loess") + 
   labs(x = "Global Subjectivity", y = "Rate Positive Words", 
        title="Correlation of Global Subjectivity to Rate of Positive Words", colour = "Rate Positive Words")
 ```
+
+![](../Reports/Entertainment_files/figure-gfm/graph4-1.png)<!-- -->
 
 ## Graph 5
 
@@ -207,10 +211,12 @@ is worth further exploration, or where the maximum number of shares were
 observed.
 
 ``` r
-graph5 <- ggplot(newsTrain, aes(x=timedelta)) + 
+ggplot(newsTrain, aes(x=timedelta)) + 
   geom_line(aes(y=shares)) + 
   labs(title="Shares across timedelta", y="Shares")
 ```
+
+![](../Reports/Entertainment_files/figure-gfm/graph5-1.png)<!-- -->
 
 ## Graph 6
 
@@ -576,8 +582,8 @@ knitr::kable(results)
 |:---------------|---------:|----------:|---------:|
 | Linear Model 1 | 7651.589 | 0.0200846 | 2891.915 |
 | Linear Model 2 | 7619.081 | 0.0273239 | 2901.168 |
-| Random Forest  | 7613.206 | 0.0294554 | 2915.883 |
+| Random Forest  | 7596.920 | 0.0332913 | 2918.166 |
 | Boosted Trees  | 7685.932 | 0.0118497 | 2925.029 |
 
 The best model out of the 4 that were tested was Random Forest with an
-RMSE of 7613.2059353.
+RMSE of 7596.9198317.

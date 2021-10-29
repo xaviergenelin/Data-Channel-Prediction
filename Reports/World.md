@@ -153,13 +153,15 @@ the boxplot.
 avgValues <- newsTrain %>% group_by(weekday) %>% summarise(avg = mean(shares)) 
 
 # ylim added because it was impossible to see anything without it due to large outliers
-graph2 <- ggplot(newsTrain, aes(x = weekday, y = shares)) +
+ggplot(newsTrain, aes(x = weekday, y = shares)) +
   geom_boxplot(fill = "grey") + 
   coord_cartesian(ylim = c(0,10000)) +
   geom_point(avgValues, mapping = aes(x = weekday, y = avg), color = "navy") + 
   geom_line(avgValues, mapping = aes(x = weekday, y = avg, group = 1), color = "navy") +
   labs(title = "Shares by Weekday", subtitle = "Means shown in navy blue", x = "Weekday", y = "Shares")
 ```
+
+![](../Reports/World_files/figure-gfm/graph2-1.png)<!-- -->
 
 ## Graph 3
 
@@ -190,12 +192,14 @@ line should reveal if the variables potential influence one another of
 if they have a positive or negative relationship.
 
 ``` r
-graph4 <- ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
+ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
   geom_point(aes(color = rate_positive_words), position = "jitter") + 
   geom_smooth(formula = y ~ x, method = "loess") + 
   labs(x = "Global Subjectivity", y = "Rate Positive Words", 
        title="Correlation of Global Subjectivity to Rate of Positive Words", colour = "Rate Positive Words")
 ```
+
+![](../Reports/World_files/figure-gfm/graph4-1.png)<!-- -->
 
 ## Graph 5
 
@@ -207,10 +211,12 @@ is worth further exploration, or where the maximum number of shares were
 observed.
 
 ``` r
-graph5 <- ggplot(newsTrain, aes(x=timedelta)) + 
+ggplot(newsTrain, aes(x=timedelta)) + 
   geom_line(aes(y=shares)) + 
   labs(title="Shares across timedelta", y="Shares")
 ```
+
+![](../Reports/World_files/figure-gfm/graph5-1.png)<!-- -->
 
 ## Graph 6
 
@@ -572,7 +578,7 @@ knitr::kable(results)
 |:---------------|---------:|----------:|---------:|
 | Linear Model 1 | 4617.892 | 0.0233453 | 1844.947 |
 | Linear Model 2 | 4599.819 | 0.0308894 | 1835.799 |
-| Random Forest  | 4670.752 | 0.0212738 | 1863.985 |
+| Random Forest  | 4675.371 | 0.0224465 | 1875.904 |
 | Boosted Trees  | 4656.408 | 0.0204393 | 1843.115 |
 
 The best model out of the 4 that were tested was Linear Model 2 with an

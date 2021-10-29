@@ -104,7 +104,7 @@ The plot below shows boxplots of the shares by weekday. The box itself shows the
 avgValues <- newsTrain %>% group_by(weekday) %>% summarise(avg = mean(shares)) 
 
 # ylim added because it was impossible to see anything without it due to large outliers
-graph2 <- ggplot(newsTrain, aes(x = weekday, y = shares)) +
+ggplot(newsTrain, aes(x = weekday, y = shares)) +
   geom_boxplot(fill = "grey") + 
   coord_cartesian(ylim = c(0,10000)) +
   geom_point(avgValues, mapping = aes(x = weekday, y = avg), color = "navy") + 
@@ -127,7 +127,7 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
 This graph shows the relationship between the global subjectivity and rate of positive words variables. The graph returns a scatter plot along with a trend line in order to determine what type of relationship may exist between the data and variables.  The plot coupled with the trend line should reveal if the variables potential influence one another of if they have a positive or negative relationship.  
 
 ```{r graph4}
-graph4 <- ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
+ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
   geom_point(aes(color = rate_positive_words), position = "jitter") + 
   geom_smooth(formula = y ~ x, method = "loess") + 
   labs(x = "Global Subjectivity", y = "Rate Positive Words", 
@@ -139,7 +139,7 @@ graph4 <- ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subje
 This plot shows the number of shares across the time delta variable.  The time delta variable represents days between article publication and data set acquisition.  This will show where along the time delta number line shares may be greatest or lowest, if some sort of pattern may exist that is worth further exploration, or where the maximum number of shares were observed.
 
 ```{r graph5}
-graph5 <- ggplot(newsTrain, aes(x=timedelta)) + 
+ggplot(newsTrain, aes(x=timedelta)) + 
   geom_line(aes(y=shares)) + 
   labs(title="Shares across timedelta", y="Shares")
 ```
