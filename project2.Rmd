@@ -282,7 +282,8 @@ wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_
                 tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25),
                                        .interaction.depth = seq(1, 4, by = 1),
                                        .shrinkage = (0.1),
-                                       .n.minobsinnode = (10)))
+                                       .n.minobsinnode = (10)),
+               verbose = FALSE)
 
 wtPred <- predict(wtFit, newsTest)
 

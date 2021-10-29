@@ -530,24 +530,9 @@ wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_
                 tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25),
                                        .interaction.depth = seq(1, 4, by = 1),
                                        .shrinkage = (0.1),
-                                       .n.minobsinnode = (10)))
-```
+                                       .n.minobsinnode = (10)),
+               verbose = FALSE)
 
-    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
-    ##      1 202483084.4328             nan     0.1000 193990.5714
-    ##      2 201451562.6944             nan     0.1000 368818.8689
-    ##      3 198708827.7580             nan     0.1000 28794.5475
-    ##      4 196435745.6394             nan     0.1000 355576.1948
-    ##      5 196102479.1185             nan     0.1000 -233212.0880
-    ##      6 195684118.5696             nan     0.1000 -44524.5485
-    ##      7 195451302.4860             nan     0.1000 -151495.5590
-    ##      8 194285588.3303             nan     0.1000 -203255.9312
-    ##      9 193336820.4406             nan     0.1000 -456105.6499
-    ##     10 191824283.6307             nan     0.1000 -614305.9017
-    ##     20 185683877.6964             nan     0.1000 -688048.3212
-    ##     25 183459761.2646             nan     0.1000 -718378.3127
-
-``` r
 wtPred <- predict(wtFit, newsTest)
 
 wtResults <- postResample(wtPred, obs = newsTest$shares)
