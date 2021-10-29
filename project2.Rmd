@@ -11,7 +11,7 @@ params:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse) 
 library(rmarkdown) 
 library(caret) 
@@ -39,7 +39,7 @@ Libraries that are being used:
 
 Before doing our analysis, we need to load in the data and do some data manipulation. Since we are only looking at the `r params$channel` data channel, we'll filter the dataset on this channel and create a new variable for the weekday from the columns `weekday_is_*`. After filtering and creating the weekday variable, we'll remove the columns that went into creating those and the url column since these won't help further in our analysis. From the filtered data set we made a training and test set with a 70:30 split to help with our modeling later. 
 
-```{r data}
+```{r data, warning=FALSE, message=FALSE}
 # load in the data
 news <- read_csv("OnlineNewsPopularity.csv")
 
