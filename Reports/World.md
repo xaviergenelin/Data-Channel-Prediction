@@ -136,7 +136,7 @@ graph1 <- ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) +
 graph1
 ```
 
-![](Reports/World_files/figure-gfm/graph1-1.png)<!-- -->
+![](../Reports/World_files/figure-gfmgraph1-1.png)<!-- -->
 
 ## Graph 2
 
@@ -165,7 +165,7 @@ graph2 <- ggplot(newsTrain, aes(x = weekday, y = shares)) +
 graph2
 ```
 
-![](Reports/World_files/figure-gfm/graph2-1.png)<!-- -->
+![](../Reports/World_files/figure-gfmgraph2-1.png)<!-- -->
 
 ## Graph 3
 
@@ -186,7 +186,7 @@ graph3 <- ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
 graph3
 ```
 
-![](Reports/World_files/figure-gfm/graph3-1.png)<!-- -->
+![](../Reports/World_files/figure-gfmgraph3-1.png)<!-- -->
 
 ## Graph 4
 
@@ -207,7 +207,7 @@ graph4 <- ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subje
 graph4
 ```
 
-![](Reports/World_files/figure-gfm/graph4-1.png)<!-- -->
+![](../Reports/World_files/figure-gfmgraph4-1.png)<!-- -->
 
 ## Graph 5
 
@@ -226,7 +226,7 @@ graph5 <- ggplot(newsTrain, aes(x=timedelta)) +
 graph5
 ```
 
-![](Reports/World_files/figure-gfm/graph5-1.png)<!-- -->
+![](../Reports/World_files/figure-gfmgraph5-1.png)<!-- -->
 
 ## Graph 6
 
@@ -246,7 +246,7 @@ corrs <- cor(newsTrain %>% select(!weekday))
 graph6 <- corrplot(corrs, method =  "color", tl.cex = 0.5, type = "upper")
 ```
 
-![](Reports/World_files/figure-gfm/graph6-1.png)<!-- -->
+![](../Reports/World_files/figure-gfmgraph6-1.png)<!-- -->
 
 ``` r
 graph6
