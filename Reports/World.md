@@ -121,8 +121,6 @@ numerically.
 
 ## Graph 1
 
-This is different
-
 This plot shows the number of images associated with the number of
 keywords. The chart bins the results and shows the clustering of images
 for each count of keywords. The clustering should reveal if there is a
@@ -131,11 +129,9 @@ number of keywords had the most or least amount of images associated
 with it.
 
 ``` r
-graph1 <- ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) + 
+ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) + 
   geom_point(aes(color = num_imgs), position = "jitter") + 
   labs(x = "Keywords", y = "Number of Images", title="Images to Keywords", colour = "num_imgs")
-
-graph1
 ```
 
 ![](../Reports/World_files/figure-gfm/graph1-1.png)<!-- -->
