@@ -11,7 +11,8 @@ params:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+imgPath <- paste0("../Reports/", params$channel, "_files/figure-gfm/")
+knitr::opts_chunk$set(echo = TRUE, fig.path = imgPath)
 library(tidyverse) 
 library(rmarkdown) 
 library(caret) 
@@ -94,7 +95,6 @@ ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) +
   labs(x = "Keywords", y = "Number of Images", title="Images to Keywords", colour = "num_imgs")
 ```
 
-
 ## Graph 2
 
 The plot below shows boxplots of the shares by weekday. The box itself shows the middle 50$\%$ of the data for that weekday and any outliers are shown as points outside of the box. The bottom end of the box shows the number of shares that are at 25$\%$ for that weekday, the top end shows the 75th percentile of the data, and the line in the box shows the median. This can help us tell if the data is skewed one way or another based on where the line is within the box. We also added data points in blue that show the average value based on the weekday as well to compare it with the boxplot.  
@@ -104,7 +104,7 @@ The plot below shows boxplots of the shares by weekday. The box itself shows the
 avgValues <- newsTrain %>% group_by(weekday) %>% summarise(avg = mean(shares)) 
 
 # ylim added because it was impossible to see anything without it due to large outliers
-ggplot(newsTrain, aes(x = weekday, y = shares)) +
+graph2 <- ggplot(newsTrain, aes(x = weekday, y = shares)) +
   geom_boxplot(fill = "grey") + 
   coord_cartesian(ylim = c(0,10000)) +
   geom_point(avgValues, mapping = aes(x = weekday, y = avg), color = "navy") + 
@@ -127,7 +127,7 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
 This graph shows the relationship between the global subjectivity and rate of positive words variables. The graph returns a scatter plot along with a trend line in order to determine what type of relationship may exist between the data and variables.  The plot coupled with the trend line should reveal if the variables potential influence one another of if they have a positive or negative relationship.  
 
 ```{r graph4}
-ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
+graph4 <- ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
   geom_point(aes(color = rate_positive_words), position = "jitter") + 
   geom_smooth(formula = y ~ x, method = "loess") + 
   labs(x = "Global Subjectivity", y = "Rate Positive Words", 
@@ -139,7 +139,7 @@ ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) 
 This plot shows the number of shares across the time delta variable.  The time delta variable represents days between article publication and data set acquisition.  This will show where along the time delta number line shares may be greatest or lowest, if some sort of pattern may exist that is worth further exploration, or where the maximum number of shares were observed.
 
 ```{r graph5}
-ggplot(newsTrain, aes(x=timedelta)) + 
+graph5 <- ggplot(newsTrain, aes(x=timedelta)) + 
   geom_line(aes(y=shares)) + 
   labs(title="Shares across timedelta", y="Shares")
 ```
@@ -205,9 +205,9 @@ The first linear model we'll look at uses the variables `num_imgs`, `kw_min_avg`
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
-trainglmfit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, 
-                     data = newsTrain, method = "lm", 
-                     trControl = trainControl(method = "cv", number = 10), 
+trainglmfit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg,
+                     data = newsTrain, method = "lm",
+                     trControl = trainControl(method = "cv", number = 10),
                      preProcess = c("center", "scale"))
 
 pred1 <- predict(trainglmfit, newdata = newsTest)
@@ -225,9 +225,9 @@ The next linear model uses the variables `num_imgs`, `kw_avg_avg`, `LDA_02`, `LD
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
-mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
-                data = newsTrain, method = "lm", 
-                trControl = trainControl(method = "cv", number = 10), 
+mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words,
+                data = newsTrain, method = "lm",
+                trControl = trainControl(method = "cv", number = 10),
                 preProcess = c("center", "scale"))
 
 mlrPred <- predict(mlrFit, newsTest)
@@ -251,10 +251,10 @@ registerDoParallel(cl)
 # random forest model with preprocessed data that is centered and scaled
 # use 5-fold cross validation
 # mtry from 1:7
-rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
-               data = newsTrain, method = "rf", 
-               preProcess = c("center", "scale"), 
-               trControl = trainControl(method = "cv", number = 5), 
+rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words,
+               data = newsTrain, method = "rf",
+               preProcess = c("center", "scale"),
+               trControl = trainControl(method = "cv", number = 5),
                tuneGrid = expand.grid(mtry = 1:7))
 
 rfPred <- predict(rfFit, newsTest)
@@ -275,13 +275,13 @@ cb <- makePSOCKcluster(5)
 registerDoParallel(cb)
 
 set.seed(30)
-wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
-                data = newsTrain, method = "gbm", 
-                preProcess = c("center", "scale"), 
-                trControl = trainControl(method = "cv", number = 5), 
-                tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25), 
-                                       .interaction.depth = seq(1, 4, by = 1), 
-                                       .shrinkage = (0.1), 
+wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words,
+                data = newsTrain, method = "gbm",
+                preProcess = c("center", "scale"),
+                trControl = trainControl(method = "cv", number = 5),
+                tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25),
+                                       .interaction.depth = seq(1, 4, by = 1),
+                                       .shrinkage = (0.1),
                                        .n.minobsinnode = (10)))
 
 wtPred <- predict(wtFit, newsTest)

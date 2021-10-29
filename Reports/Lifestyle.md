@@ -33,7 +33,26 @@ from the UCI Machine Learning Repository. For this analysis, we’ll be
 examining the Lifestyle data channel. Our analysis for this channel will
 go into an exploratory data analysis with different graphs and numerical
 summaries, as well as trying to predict the number of shares with
-different types of models.
+different types of models. We’ll examine different variables in our
+analysis, but `shares` is our main variable of interest throughout this
+report. This is the response variable that will be used in each of the
+predictive models.
+
+Our exploratory analysis will look at how the variables `weekday` (day
+of the week), , `num_imgs` (number of images), and `timedelta` (days
+between article publication and dataset acquisition) relate to the
+number of shares. We also examine how `rate_positive_words` (rate of
+positive words among non-neutral tokens) and `global_subjectivity` (text
+subjectivity) relate to one another.
+
+Our predictive models will be looking at how well the variables
+`num_imgs`, `kw_avg_avg` (Average keyword for average shares), `LDA_02`
+(Closeness to LDA topic 2), `LDA_03` (Closeness to LDA topic 3),
+`average_token_length` (average length of words in the content),
+`rate_negative_words` (rate of negative words among non-neutral tokens),
+`kw_min_avg` (worst keyword for minimum shares), and `kw_max_avg` (best
+keyword for average shares) are able to predict the number of `shares`
+for different models.
 
 Libraries that are being used:
 
@@ -102,11 +121,12 @@ numerically.
 
 ## Graph 1
 
-This plot shows the binning of the number of images associated with
-number of keywords. Generally speaking the number of images remains low
-for each count of keywords, but does slowly increase as the number of
-keywords increases. This does suggest there is somewhat of a positive
-correlation between the two variables.
+This plot shows the number of images associated with the number of
+keywords. The chart bins the results and shows the clustering of images
+for each count of keywords. The clustering should reveal if there is a
+positive or negative relationship between the two variables, and what
+number of keywords had the most or least amount of images associated
+with it.
 
 ``` r
 ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) + 
@@ -114,7 +134,7 @@ ggplot(data = newsTrain, aes(x = num_keywords, y = num_imgs)) +
   labs(x = "Keywords", y = "Number of Images", title="Images to Keywords", colour = "num_imgs")
 ```
 
-![](Reports/Lifestyle_files/figure-gfm/graph1-1.png)<!-- -->
+![](../Reports/Lifestyle_files/figure-gfm/graph1-1.png)<!-- -->
 
 ## Graph 2
 
@@ -133,15 +153,13 @@ the boxplot.
 avgValues <- newsTrain %>% group_by(weekday) %>% summarise(avg = mean(shares)) 
 
 # ylim added because it was impossible to see anything without it due to large outliers
-ggplot(newsTrain, aes(x = weekday, y = shares)) +
+graph2 <- ggplot(newsTrain, aes(x = weekday, y = shares)) +
   geom_boxplot(fill = "grey") + 
   coord_cartesian(ylim = c(0,10000)) +
   geom_point(avgValues, mapping = aes(x = weekday, y = avg), color = "navy") + 
   geom_line(avgValues, mapping = aes(x = weekday, y = avg, group = 1), color = "navy") +
   labs(title = "Shares by Weekday", subtitle = "Means shown in navy blue", x = "Weekday", y = "Shares")
 ```
-
-![](Reports/Lifestyle_files/figure-gfm/graph2-1.png)<!-- -->
 
 ## Graph 3
 
@@ -160,42 +178,39 @@ ggplot(newsTrain, aes(x = num_imgs, y = shares)) +
   labs(title = "Shares vs Number of Images by Weekday", x = "Number of Images", y = "Shares")
 ```
 
-![](Reports/Lifestyle_files/figure-gfm/graph3-1.png)<!-- -->
+![](../Reports/Lifestyle_files/figure-gfm/graph3-1.png)<!-- -->
 
 ## Graph 4
 
 This graph shows the relationship between the global subjectivity and
-rate of positive words. There is a positive correlation between the
-variables that increases at a decreasing rate then starts to decline,
-suggesting that the rate of positive words is highest when global
-subjectivity is .75.
+rate of positive words variables. The graph returns a scatter plot along
+with a trend line in order to determine what type of relationship may
+exist between the data and variables. The plot coupled with the trend
+line should reveal if the variables potential influence one another of
+if they have a positive or negative relationship.
 
 ``` r
-ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
+graph4 <- ggplot(data = newsTrain, aes(y = rate_positive_words, x = global_subjectivity)) + 
   geom_point(aes(color = rate_positive_words), position = "jitter") + 
   geom_smooth(formula = y ~ x, method = "loess") + 
   labs(x = "Global Subjectivity", y = "Rate Positive Words", 
        title="Correlation of Global Subjectivity to Rate of Positive Words", colour = "Rate Positive Words")
 ```
 
-![](Reports/Lifestyle_files/figure-gfm/graph4-1.png)<!-- -->
-
 ## Graph 5
 
 This plot shows the number of shares across the time delta variable. The
-overall number of shares is highest when the timedelta is around 75,
-then is less frequent as the timedelta grows larger. There are some
-intermittent spikes of shares time deltas of 275 and 425. This chart
-also suggests that number of shares will be less as the timedelta grows
-larger.
+time delta variable represents days between article publication and data
+set acquisition. This will show where along the time delta number line
+shares may be greatest or lowest, if some sort of pattern may exist that
+is worth further exploration, or where the maximum number of shares were
+observed.
 
 ``` r
-ggplot(newsTrain, aes(x=timedelta)) + 
+graph5 <- ggplot(newsTrain, aes(x=timedelta)) + 
   geom_line(aes(y=shares)) + 
   labs(title="Shares across timedelta", y="Shares")
 ```
-
-![](Reports/Lifestyle_files/figure-gfm/graph5-1.png)<!-- -->
 
 ## Graph 6
 
@@ -215,19 +230,19 @@ corrs <- cor(newsTrain %>% select(!weekday))
 corrplot(corrs, method =  "color", tl.cex = 0.5, type = "upper")
 ```
 
-![](Reports/Lifestyle_files/figure-gfm/graph6-1.png)<!-- -->
+![](../Reports/Lifestyle_files/figure-gfm/graph6-1.png)<!-- -->
 
 ## Contingency Tables
 
 ### 2-way Contingency Table
 
 This contingency table shows the relationship of number of keywords
-observed on the weekend. The 0 column represents weekdays, which should
-suggest the overall counts for that column will be larger that the 1
-column. The interesting observation is the counts appear to be someone
-proportional to one another, with the distributions appearing to mirror
-one another. The implies there is consistency of the number of key words
-observed between the weekdays and weekends.
+observed during the days of the week and the weekend. The 0 column
+represents weekdays with the 1 column representing the weekend along
+with counts of how may times the number of keywords was observed. The
+column on the left shows the number of keywords observed. Analysis can
+be conducted to determine where the greatest and least concentrations of
+keywords were observed.
 
 ``` r
 table(newsTrain$num_keywords, newsTrain$is_weekend)
@@ -247,8 +262,10 @@ table(newsTrain$num_keywords, newsTrain$is_weekend)
 ### 3-Way Contingency Table
 
 This contingency table takes the 2-way table above and breaks it down
-further by the worst keyword (min shares) variable. The majority of the
-keywords fall into the -1, 4, and 217 bins.
+further by binning it across values of the worst keyword (min shares)
+variable. This will allow exploration of number of keywords observed on
+a weekday or weekend and see what those counts look like across the
+different worst keyword (min shares) segments
 
 ``` r
 table(newsTrain$num_keywords, newsTrain$is_weekend, newsTrain$kw_min_min)
@@ -405,7 +422,8 @@ different techniques can be used to prepare or train the linear
 regression equation from data, the most common of which is called
 Ordinary Least Squares. The two models below are both multiple linear
 regression models, where multiple predictors from a training set of data
-are being used to predict the number of shares.
+are being used to predict the number of shares which is the response
+variable.
 
 ### Linear Model 1
 
@@ -418,9 +436,9 @@ set.
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
-trainglmfit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, 
-                     data = newsTrain, method = "lm", 
-                     trControl = trainControl(method = "cv", number = 10), 
+trainglmfit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg,
+                     data = newsTrain, method = "lm",
+                     trControl = trainControl(method = "cv", number = 10),
                      preProcess = c("center", "scale"))
 
 pred1 <- predict(trainglmfit, newdata = newsTest)
@@ -441,9 +459,9 @@ this uses 10-fold cross validation on the training set.
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
 
-mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
-                data = newsTrain, method = "lm", 
-                trControl = trainControl(method = "cv", number = 10), 
+mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words,
+                data = newsTrain, method = "lm",
+                trControl = trainControl(method = "cv", number = 10),
                 preProcess = c("center", "scale"))
 
 mlrPred <- predict(mlrFit, newsTest)
@@ -479,10 +497,10 @@ registerDoParallel(cl)
 # random forest model with preprocessed data that is centered and scaled
 # use 5-fold cross validation
 # mtry from 1:7
-rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
-               data = newsTrain, method = "rf", 
-               preProcess = c("center", "scale"), 
-               trControl = trainControl(method = "cv", number = 5), 
+rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words,
+               data = newsTrain, method = "rf",
+               preProcess = c("center", "scale"),
+               trControl = trainControl(method = "cv", number = 5),
                tuneGrid = expand.grid(mtry = 1:7))
 
 rfPred <- predict(rfFit, newsTest)
@@ -518,13 +536,13 @@ cb <- makePSOCKcluster(5)
 registerDoParallel(cb)
 
 set.seed(30)
-wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
-                data = newsTrain, method = "gbm", 
-                preProcess = c("center", "scale"), 
-                trControl = trainControl(method = "cv", number = 5), 
-                tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25), 
-                                       .interaction.depth = seq(1, 4, by = 1), 
-                                       .shrinkage = (0.1), 
+wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words,
+                data = newsTrain, method = "gbm",
+                preProcess = c("center", "scale"),
+                trControl = trainControl(method = "cv", number = 5),
+                tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25),
+                                       .interaction.depth = seq(1, 4, by = 1),
+                                       .shrinkage = (0.1),
                                        .n.minobsinnode = (10)))
 ```
 
@@ -572,7 +590,7 @@ knitr::kable(results)
 |:---------------|---------:|----------:|---------:|
 | Linear Model 1 | 7338.378 | 0.0063790 | 3296.471 |
 | Linear Model 2 | 7361.524 | 0.0029709 | 3293.983 |
-| Random Forest  | 7503.762 | 0.0016844 | 3380.650 |
+| Random Forest  | 7499.166 | 0.0032886 | 3406.172 |
 | Boosted Trees  | 7424.820 | 0.0015421 | 3319.940 |
 
 The best model out of the 4 that were tested was Linear Model 1 with an
