@@ -821,19 +821,19 @@ and scaled and the model use 10-fold cross validation on the training
 set.
 
 ``` r
-cl <- makePSOCKcluster(5)
-registerDoParallel(cl)
-
-trainglmfit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, 
-                     data = newsTrain, method = "lm", 
-                     trControl = trainControl(method = "cv", number = 10), 
-                     preProcess = c("center", "scale"))
-
-pred1 <- predict(trainglmfit, newdata = newsTest)
-
-lm1Results <- postResample(pred1, obs = newsTest$shares)
-
-stopCluster(cl)
+# cl <- makePSOCKcluster(5)
+# registerDoParallel(cl)
+# 
+# trainglmfit <- train(shares ~ num_imgs + kw_min_avg + kw_max_avg + kw_avg_avg, 
+#                      data = newsTrain, method = "lm", 
+#                      trControl = trainControl(method = "cv", number = 10), 
+#                      preProcess = c("center", "scale"))
+# 
+# pred1 <- predict(trainglmfit, newdata = newsTest)
+# 
+# lm1Results <- postResample(pred1, obs = newsTest$shares)
+# 
+# stopCluster(cl)
 ```
 
 ### Linear Model 2
@@ -844,19 +844,19 @@ Similar to the previous model, the values are centered and scaled and
 this uses 10-fold cross validation on the training set.
 
 ``` r
-cl <- makePSOCKcluster(5)
-registerDoParallel(cl)
-
-mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
-                data = newsTrain, method = "lm", 
-                trControl = trainControl(method = "cv", number = 10), 
-                preProcess = c("center", "scale"))
-
-mlrPred <- predict(mlrFit, newsTest)
-
-mlrResults <- postResample(mlrPred, obs = newsTest$shares)
-
-stopCluster(cl)
+# cl <- makePSOCKcluster(5)
+# registerDoParallel(cl)
+# 
+# mlrFit <- train(shares ~  num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
+#                 data = newsTrain, method = "lm", 
+#                 trControl = trainControl(method = "cv", number = 10), 
+#                 preProcess = c("center", "scale"))
+# 
+# mlrPred <- predict(mlrFit, newsTest)
+# 
+# mlrResults <- postResample(mlrPred, obs = newsTest$shares)
+# 
+# stopCluster(cl)
 ```
 
 ## Ensemble
@@ -879,23 +879,23 @@ We’ll check the tuning parameter `mtry` for values from 1 to 7.
 
 ``` r
 # make cluster for parallel computing
-cl <- makePSOCKcluster(5)
-registerDoParallel(cl)
-
-# random forest model with preprocessed data that is centered and scaled
-# use 5-fold cross validation
-# mtry from 1:7
-rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
-               data = newsTrain, method = "rf", 
-               preProcess = c("center", "scale"), 
-               trControl = trainControl(method = "cv", number = 5), 
-               tuneGrid = expand.grid(mtry = 1:7))
-
-rfPred <- predict(rfFit, newsTest)
-
-rfResults <- postResample(rfPred, obs = newsTest$shares)
-
-stopCluster(cl)
+# cl <- makePSOCKcluster(5)
+# registerDoParallel(cl)
+# 
+# # random forest model with preprocessed data that is centered and scaled
+# # use 5-fold cross validation
+# # mtry from 1:7
+# rfFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
+#                data = newsTrain, method = "rf", 
+#                preProcess = c("center", "scale"), 
+#                trControl = trainControl(method = "cv", number = 5), 
+#                tuneGrid = expand.grid(mtry = 1:7))
+# 
+# rfPred <- predict(rfFit, newsTest)
+# 
+# rfResults <- postResample(rfPred, obs = newsTest$shares)
+# 
+# stopCluster(cl)
 ```
 
 The optimal mtry value for the random forest model is 1.
@@ -920,42 +920,24 @@ respectively, but then we’re also checking for the number of trees from
 25, 50, 75, …, 200 and an interaction depth of 1, 2, 3, and 4.
 
 ``` r
-cb <- makePSOCKcluster(5)
-registerDoParallel(cb)
-
-set.seed(30)
-wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
-                data = newsTrain, method = "gbm", 
-                preProcess = c("center", "scale"), 
-                trControl = trainControl(method = "cv", number = 5), 
-                tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25), 
-                                       .interaction.depth = seq(1, 4, by = 1), 
-                                       .shrinkage = (0.1), 
-                                       .n.minobsinnode = (10)))
-```
-
-    ## Iter   TrainDeviance   ValidDeviance   StepSize   Improve
-    ##      1 43564849.5571             nan     0.1000 9520.5888
-    ##      2 43393306.4875             nan     0.1000 20774.2917
-    ##      3 43327404.7814             nan     0.1000 38360.1262
-    ##      4 43191806.7892             nan     0.1000 40025.6883
-    ##      5 43112178.9371             nan     0.1000 37063.6335
-    ##      6 43014545.7794             nan     0.1000 -17000.2831
-    ##      7 42905318.9284             nan     0.1000 47760.7874
-    ##      8 42828100.4691             nan     0.1000 42015.3671
-    ##      9 42760680.1587             nan     0.1000 9067.6491
-    ##     10 42714361.4666             nan     0.1000 -28914.8396
-    ##     20 42319615.1150             nan     0.1000 -20513.6913
-    ##     40 41941082.3694             nan     0.1000 15724.4369
-    ##     60 41614400.8675             nan     0.1000 -1019.3049
-    ##     75 41358651.2660             nan     0.1000 -26784.8451
-
-``` r
-wtPred <- predict(wtFit, newsTest)
-
-wtResults <- postResample(wtPred, obs = newsTest$shares)
-
-stopCluster(cb)
+# cb <- makePSOCKcluster(5)
+# registerDoParallel(cb)
+# 
+# set.seed(30)
+# wtFit <- train(shares ~ num_imgs + kw_avg_avg + LDA_02 + LDA_03 + average_token_length + rate_negative_words, 
+#                 data = newsTrain, method = "gbm", 
+#                 preProcess = c("center", "scale"), 
+#                 trControl = trainControl(method = "cv", number = 5), 
+#                 tuneGrid = expand.grid(.n.trees = seq(25, 200, by = 25), 
+#                                        .interaction.depth = seq(1, 4, by = 1), 
+#                                        .shrinkage = (0.1), 
+#                                        .n.minobsinnode = (10)))
+# 
+# wtPred <- predict(wtFit, newsTest)
+# 
+# wtResults <- postResample(wtPred, obs = newsTest$shares)
+# 
+# stopCluster(cb)
 ```
 
 The optimal tuning parameters for the boosted tree were 75 trees and an
@@ -965,22 +947,15 @@ and `n.minobsinnode`.
 # Comparison
 
 ``` r
-results <- rbind(t(lm1Results), t(mlrResults), t(rfResults), t(wtResults))
-models <- c("Linear Model 1", "Linear Model 2", "Random Forest", "Boosted Trees")
-
-results <- data.frame(results, row.names = models)
-
-bestModel <- results %>% mutate(model = models) %>% filter(RMSE == min(RMSE))
-
-knitr::kable(results)
+# results <- rbind(t(lm1Results), t(mlrResults), t(rfResults), t(wtResults))
+# models <- c("Linear Model 1", "Linear Model 2", "Random Forest", "Boosted Trees")
+# 
+# results <- data.frame(results, row.names = models)
+# 
+# bestModel <- results %>% mutate(model = models) %>% filter(RMSE == min(RMSE))
+# 
+# knitr::kable(results)
 ```
-
-|                |     RMSE |  Rsquared |      MAE |
-|:---------------|---------:|----------:|---------:|
-| Linear Model 1 | 4617.892 | 0.0233453 | 1844.947 |
-| Linear Model 2 | 4599.819 | 0.0308894 | 1835.799 |
-| Random Forest  | 4675.371 | 0.0224465 | 1875.904 |
-| Boosted Trees  | 4656.408 | 0.0204393 | 1843.115 |
 
 The best model out of the 4 that were tested was Linear Model 2 with an
 RMSE of 4599.8193812.
