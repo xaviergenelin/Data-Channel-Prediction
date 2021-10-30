@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The purpose of this project is to analyze the [Online News Popularity Data Set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity) from the UCI Machine Learning Repository using predictive models in R. We'll automate the process of analyzing 6 different data channels within the data set that involves exporatory data analysis and predictive modeling for the number of shares. 
+The purpose of this project is to analyze the [Online News Popularity Data Set](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity) from the UCI Machine Learning Repository using predictive models in R. We'll automate the process of analyzing 6 different data channels within the data set that involves exploratory data analysis and predictive modeling for the number of shares. 
 
 ## Required Packages
 
