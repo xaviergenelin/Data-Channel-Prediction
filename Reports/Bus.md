@@ -1,7 +1,7 @@
 Bus Analysis
 ================
 Group 6, Xavier Genelin, Dave Bergeron
-10/28/2021
+10/30/2021
 
 -   [Introduction](#introduction)
 -   [Load and Manipulate Data](#load-and-manipulate-data)
@@ -13,7 +13,7 @@ Group 6, Xavier Genelin, Dave Bergeron
     -   [Graph 5](#graph-5)
     -   [Graph 6](#graph-6)
     -   [Contingency Tables](#contingency-tables)
-        -   [2-way Contingency Table](#2-way-contingency-table)
+        -   [2-Way Contingency Table](#2-way-contingency-table)
         -   [3-Way Contingency Table](#3-way-contingency-table)
     -   [Numerical Summary](#numerical-summary)
 -   [Modeling](#modeling)
@@ -153,6 +153,7 @@ the boxplot.
 avgValues <- newsTrain %>% group_by(weekday) %>% summarise(avg = mean(shares)) 
 
 # ylim added because it was impossible to see anything without it due to large outliers
+# put the average values on the boxplot to see how it compares to the median and other values, shown in navy blue 
 ggplot(newsTrain, aes(x = weekday, y = shares)) +
   geom_boxplot(fill = "grey") + 
   coord_cartesian(ylim = c(0,10000)) +
@@ -166,7 +167,7 @@ ggplot(newsTrain, aes(x = weekday, y = shares)) +
 ## Graph 3
 
 The next graph shows the number of images and the number of shares that
-we have in the data set, along with the different days in different
+we have in the data set along with the different days in different
 colors. This can give us some insight in a more detailed level if there
 is any relationship with shares and images as a whole, or even if it
 depends on the day. If there is a positive relationship between the two,
@@ -188,7 +189,7 @@ This graph shows the relationship between the global subjectivity and
 rate of positive words variables. The graph returns a scatter plot along
 with a trend line in order to determine what type of relationship may
 exist between the data and variables. The plot coupled with the trend
-line should reveal if the variables potential influence one another of
+line should reveal if the variables potentially influence one another of
 if they have a positive or negative relationship.
 
 ``` r
@@ -240,7 +241,7 @@ corrplot(corrs, method =  "color", tl.cex = 0.5, type = "upper")
 
 ## Contingency Tables
 
-### 2-way Contingency Table
+### 2-Way Contingency Table
 
 This contingency table shows the relationship of number of keywords
 observed during the days of the week and the weekend. The 0 column
@@ -269,9 +270,9 @@ table(newsTrain$num_keywords, newsTrain$is_weekend)
 ### 3-Way Contingency Table
 
 This contingency table takes the 2-way table above and breaks it down
-further by binning it across values of the worst keyword (min shares)
-variable. This will allow exploration of number of keywords observed on
-a weekday or weekend and see what those counts look like across the
+further by grouping it across values of the worst keyword (min shares)
+variable. This will allow exploration of the number of keywords observed
+on a weekday or weekend and see what those counts look like across the
 different worst keyword (min shares) segments
 
 ``` r
@@ -366,13 +367,14 @@ table(newsTrain$num_keywords, newsTrain$is_weekend, newsTrain$kw_min_min)
 
 Earlier we saw the boxplots show the number of shares based on weekdays,
 but with the large values it could be difficult to see where specific
-points lie on the graph, like the minimum value. We may not even have
+points lie on the graph, like the minimum value. We may not have even
 seen the maximum value for some of them due to large outliers. The table
 below will give the numeric summary of what we saw within the boxplots
-to help give some values to what we saw visually earlier.
+to help give some values to what we saw earlier.
 
 ``` r
 # Shares by weekday
+# get the minimum, q1, median, mean, q3, max, and sd values by weekday
 numSum <- newsTrain %>% 
   group_by(weekday) %>% 
   summarise(Min = min(shares), Q1 = quantile(shares, 0.25), Mean = mean(shares), 
@@ -406,8 +408,8 @@ many forms from simple where one variable is used to predict a response
 to multiple regression where multiple predictor variables are used to
 predict a response. Additionally, and in the context of this assignment,
 different techniques can be used to prepare or train the linear
-regression equation from data, the most common of which is called
-Ordinary Least Squares. The two models below are both multiple linear
+regression equation from data, the most common of which is called,
+“Ordinary Least Squares”. The two models below are both multiple linear
 regression models, where multiple predictors from a training set of data
 are being used to predict the number of shares which is the response
 variable.
@@ -547,11 +549,14 @@ and `n.minobsinnode`.
 # Comparison
 
 ``` r
+# Create a dataframe of the results
 results <- rbind(t(lm1Results), t(mlrResults), t(rfResults), t(wtResults))
+# rownames for the results table
 models <- c("Linear Model 1", "Linear Model 2", "Random Forest", "Boosted Trees")
 
 results <- data.frame(results, row.names = models)
 
+# get the best model based on RMSE
 bestModel <- results %>% mutate(model = models) %>% filter(RMSE == min(RMSE))
 
 knitr::kable(results)
@@ -564,5 +569,5 @@ knitr::kable(results)
 | Random Forest  | 16644.72 | 0.0110286 | 2677.903 |
 | Boosted Trees  | 16849.70 | 0.0004825 | 2777.023 |
 
-The best model out of the 4 that were tested was Linear Model 1 with an
-RMSE of 1.6626958^{4}.
+The best model out of the four that were tested was Linear Model 1 with
+an RMSE of 1.6626958^{4}.
